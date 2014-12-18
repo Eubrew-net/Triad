@@ -7,7 +7,7 @@ file_setup='triad_setup';
 run(fullfile('.','cfg',file_setup));     % configuracion por defecto
 
 Cal.Date.day0=datenum(2013,12,1);  
-Cal.Date.dayend=datenum(2014,1,31); 
+Cal.Date.dayend=datenum(2014,12,31); 
 Date.CALC_DAYS=Cal.Date.day0:Cal.Date.dayend;
 Cal.Date=Date;
 
@@ -19,7 +19,36 @@ Cal.file_save  = 'triad_comp_chk';
 
 Cal.analyzed_brewer=1:3;
 Cal.reference_brw=1:3;
- 
+
+
+%% ALL THE CONFIGURATIONS CONSTANTS HERE
+
+
+osc_interval=[400,700,1000,1200];
+Cal.brw=[157 183 185]; 
+
+Cal.sl_c=[1,1,1];
+
+
+% Generic
+% Langley processing
+airm_rang=[1.15 3.75]; 
+% from condfiguration
+%Fcorr={[0,0,0,0,0,0],[0,0,0,0,-8,0],[0,0,0,13,15,0]}; 
+%
+N_data=12; 
+O3_std=2.5;
+AOD_file=fullfile('.','130101_141231_Izana.lev15'); 
+CLOUD_file=fullfile('..','cloudScreening.txt');
+
+% Langley plots
+ylim_brw={[1550 1650],[1500 1650],[1500 1650]}; 
+ylim_dbs={[-50 50],[-50 50],[-50 50]};
+
+grp_def=@(x) {year(x) weeknum(x)};
+
+
+
 %% READ Brewer Summaries
  for i=union(Cal.analyzed_brewer,Cal.reference_brw)
     ozone_raw{i}={};   hg{i}={};   ozone_sum{i}={};  ozone_raw0{i}={};  
@@ -93,42 +122,29 @@ save(Cal.file_save,'-APPEND','A','ETC','F_corr','SL_B','SL_R','cfg','SL_flag',..
                              'summary_old','summary_orig_old','summary','summary_orig');
 
 %% Comparacion Operativa.
-close all
 
-osc_interval=[400,700,1000,1200];
-
-Cal.brw=[157 183 185]; Cal.sl_c=[1,0,0];
-[ref,ratio_ref]=join_summary(Cal,summary_old,Cal.reference_brw,Cal.analyzed_brewer,5);
+[ref_op,ratio_ref_op]=join_summary(Cal,summary_old,Cal.reference_brw,Cal.analyzed_brewer,5);
 
 % ratio_ref_plots
 [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref);
  
 %% Comparacion Alternativa
-close all
 
-osc_interval=[400,700,1000,1200];
 
-[ref,ratio_ref]=join_summary(Cal,summary,Cal.reference_brw,Cal.analyzed_brewer,5);
+[ref_alt,ratio_ref_alt]=join_summary(Cal,summary,Cal.reference_brw,Cal.analyzed_brewer,5);
 
 % ratio_ref_plots
-[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref);
+[f_hist_alt,f_ev_alt,f_sc_alt,f_smooth_alt]=ratio_ref_plots(Cal,ratio_ref_alt);
+
+
+save(fullfile('.',Cal.file_save),'-APPEND','ref_op','ratio_ref_op',...
+                                  'ref_alt','ratio_ref_alt')
+
+
+
 
 %% Langley
 close all
-
-% Generic
-% Langley processing
-airm_rang=[1.15 3.75]; 
-Fcorr={[0,0,0,0,0,0],[0,0,0,0,-8,0],[0,0,0,13,15,0]}; 
-N_data=12; 
-O3_std=2.5;
-AOD_file=fullfile('.','130101_141231_Izana.lev15'); 
-CLOUD_file=fullfile('..','cloudScreening.txt');
-
-% Langley plots
-ylim_brw={[1550 1650],[1500 1650],[1500 1650]}; 
-ylim_dbs={[-50 50],[-50 50],[-50 50]};
-grp_def=@(x) {year(x) weeknum(x)};
 
 %% ---- langley from Indiv. Measurements ----
 for brw=1:3
@@ -146,7 +162,14 @@ for brw=1:3
 end
 save(fullfile('.',Cal.file_save),'-APPEND','ozone_lgl','cfg_indv','leg','ozone_lgl_sum',...
                                            'ozone_lgl_dep','brw_indv','st_brw','dbs_indv','st_dbs');
-                                   
+      
+                                       
+                                       
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                                       
+                                       
+                                       
+                                       
+                                       
 %% R6 + ETC Langley
 cfgs=1; 
 for brw=1:3
