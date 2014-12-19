@@ -6,7 +6,7 @@ clear all;
 file_setup='triad_setup';
 run(fullfile('.','cfg',file_setup));     % configuracion por defecto
 
-Cal.Date.day0=datenum(2012,11,1);  
+Cal.Date.day0=datenum(2013,11,10);  
 Cal.Date.dayend=datenum(2014,12,31); 
 Date.CALC_DAYS=Cal.Date.day0:Cal.Date.dayend;
 Cal.Date=Date;
@@ -47,7 +47,8 @@ ylim_dbs={[-50 50],[-50 50],[-50 50]};
 
 grp_def=@(x) {year(x) weeknum(x)};
 
-
+%update the information on config
+save(Cal.file_save,'-append','Cal');
 
 
 %% Update Brewer Summaries
@@ -62,15 +63,66 @@ load(Cal.file_save);
 
     Cal.Date.CALC_DAYS=days_to_process;
      
-    [ozone,log_,missing_]=read_bdata(i,Cal);
+    [ozone_,log_,missing_]=read_bdata(i,Cal);
 
-    ozone_sum{i}=ozone.ozone_sum;
-    config{i}=ozone.config;
-    ozone_ds{i}=ozone.ozone_ds;
-    ozone_raw{i}=ozone.raw;
-    ozone_raw0{i}=ozone.raw0;
-    sl{i}=ozone.sl;       % first calibration / bfiles
-    sl_cr{i}=ozone.sl_cr; % recalc. with 2? configuration
+    updated_days=fix(cellfun(@(x) x(1,1),ozone_.ozone_sum,'un',true));
+    
+    [C,ia,ib]=union(processed_days,updated_days,'sorted');
+    
+    ozone_sum_union=cell(length(C),1);
+    ozone_sum_union(ib)=ozone_.ozone_sum;
+    ozone_sum_union(ia)=ozone_sum{i};
+    ozone_sum{i}=ozone_sum_union;
+    
+    %ozone_ds{i}=ozone.ozone_ds;
+    ozone_union=cell(length(C),1);
+    ozone_union(ib)=ozone_.ozone_ds;
+    ozone_union(ia)=ozone_ds{i};
+    ozone_ds{i}=ozone_union;
+    
+    
+    
+    %ozone_raw{i}=ozone.raw;
+    ozone_union=cell(length(C),1);
+    ozone_union(ib)=ozone_.raw;
+    ozone_union(ia)=ozone_raw{i};
+    ozone_raw{i}=ozone_union;
+    
+      
+    
+    %ozone_raw0{i}=ozone.raw0;
+    ozone_union=cell(length(C),1);
+    ozone_union(ib)=ozone_.raw0;
+    ozone_union(ia)=ozone_raw0{i};
+    ozone_raw0{i}=ozone_union;
+    
+      
+       
+    %sl{i}=ozone.sl;       % first calibration / bfiles
+    processed_days=fix(cellfun(@(x) x(1,1),sl{i},'un',true));
+    updated_days=fix(cellfun(@(x) x(1,1),ozone_.sl,'un',true));
+    [C,ia,ib]=union(processed_days,updated_days,'sorted');
+    
+    ozone_union=cell(length(C),1);
+    ozone_union(ib)=ozone_.sl;
+    ozone_union(ia)=sl{i};
+    sl{i}=ozone_union;
+    
+      
+       
+    %sl_cr{i}=ozone.sl_cr; % recalc. with 2? configuration
+    updated_days=fix(cellfun(@(x) x(1,1),ozone_.sl_cr,'un',true));
+    [C,ia,ib]=union(processed_days,updated_days,'sorted');
+    
+    ozone_union=cell(length(C),1);
+    ozone_union(ib)=ozone_.sl_cr;
+    ozone_union(ia)=sl_cr{i};
+    sl_cr{i}=ozone_union;
+    
+    
+    
+    
+    
  end
 save(Cal.file_save);
 
