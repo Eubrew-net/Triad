@@ -6,7 +6,7 @@ clear all;
 file_setup='triad_setup';
 run(fullfile('.','cfg',file_setup));     % configuracion por defecto
 
-Cal.Date.day0=datenum(2013,12,1);  
+Cal.Date.day0=datenum(2012,11,1);  
 Cal.Date.dayend=datenum(2014,12,31); 
 Date.CALC_DAYS=Cal.Date.day0:Cal.Date.dayend;
 Cal.Date=Date;
@@ -49,11 +49,19 @@ grp_def=@(x) {year(x) weeknum(x)};
 
 
 
-%% READ Brewer Summaries
- for i=union(Cal.analyzed_brewer,Cal.reference_brw)
-    ozone_raw{i}={};   hg{i}={};   ozone_sum{i}={};  ozone_raw0{i}={};  
-    config{i}={};      sl{i}={};   ozone_ds{i}={};   sl_cr{i}={};    
 
+%% Update Brewer Summaries
+load(Cal.file_save);
+ for i=union(Cal.analyzed_brewer,Cal.reference_brw)
+    
+    processed_days=fix(cellfun(@(x) x(1,1),ozone_sum{i},'un',true));
+    days_to_process=setdiff(Cal.Date.CALC_DAYS,processed_days);
+    
+    %ozone_raw{i}={};   hg{i}={};   ozone_sum{i}={};  ozone_raw0{i}={};  
+    %config{i}={};      sl{i}={};   ozone_ds{i}={};   sl_cr{i}={};    
+
+    Cal.Date.CALC_DAYS=days_to_process;
+     
     [ozone,log_,missing_]=read_bdata(i,Cal);
 
     ozone_sum{i}=ozone.ozone_sum;
