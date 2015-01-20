@@ -2,7 +2,7 @@
 warning('off','MATLAB:xlsread:Mode');
 
 %% General
-% Habr? que modificar a mano el directorio final: CODE, Are2011, SDK11 ...
+% Habra que modificar a mano el directorio final: CODE, Are2011, SDK11 ...
 if exist('alberto','file' )
        disp('alberto_setup')
        Cal.path_root=fullfile(cell2mat(regexpi(pwd,'^[A-Z]:', 'match')),'CODE','');
@@ -73,56 +73,39 @@ Cal.sl_c      =[0,  0,  0];
 Cal.sl_c_blind=[1,  1,  1];
 
 %% Brewer configuration files. Eventos e Incidencias
-events_text={}; incidences_text={}; events_raw={};
-events_n={};
-
-icf_op=cell(1,length(Cal.n_brw));  %old , operative
-icf_a=cell(1,length(Cal.n_brw));   %new , alternative
-
-icf_n=cell(1,length(Cal.n_brw));
+icf_op=cell(1,length(Cal.n_brw)); icf_a=cell(1,length(Cal.n_brw));
+events=cell(1,length(Cal.n_brw)); events_text=cell(1,length(Cal.n_brw)); events_raw=cell(1,length(Cal.n_brw));
+incidences=cell(1,length(Cal.n_brw)); incidences_text=cell(1,length(Cal.n_brw)); incidences_raw=cell(1,length(Cal.n_brw));
 for iz=1:Cal.n_brw
-    icf_n{iz}=[];
+    icf_op{iz}=[]; icf_a{iz}=[];
  try   
     if iz<4 %reference
-       icf_n{iz}=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
+       icf_op{iz}=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
                          ['icf.',Cal.brw_str{iz}],'','basic');      
-       icfn{iz}=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
+       icf_a{iz}=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
                          ['icf_a.',Cal.brw_str{iz}],'','basic');                     
-       [events_n{iz},events_text{iz},events_raw{iz}]=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
+       [events{iz},events_text{iz},events_raw{iz}]=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
                                                              ['Eventos.',Cal.brw_str{iz}],'','basic');
-       [inc_n{iz},incidences_text{iz},incidences_raw{iz}]=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
+       [incidences{iz},incidences_text{iz},incidences_raw{iz}]=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
                                                              ['Incidencias.',Cal.brw_str{iz}],'','basic');
-    else % not reference
-      if exist(fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},['icf',Cal.brw_str{iz},'.xls']))
-         icf_n{iz}=xlsread(fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},['icf',Cal.brw_str{iz},'.xls']),...
-                           ['icf.',Cal.brw_str{iz}],'','basic');
-         icfn{iz}=xlsread(fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},['icf',Cal.brw_str{iz},'.xls']),...
-                           ['icf_a.',Cal.brw_str{iz}],'','basic');                               
-         [events_n{iz},events_text{iz},events_raw{iz}]=xlsread(fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},['icf',Cal.brw_str{iz},'.xls']),...
-                                                               ['Eventos.',Cal.brw_str{iz}],'','basic');
-         [inc_n{iz},incidences_text{iz}]=xlsread(fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},['icf',Cal.brw_str{iz},'.xls']),...
-                                                 ['Incidencias.',Cal.brw_str{iz}],'','basic');         
-      else
-          continue
-      end
     end   
     
-    if size(icf_n{iz},1)==54  % ??
-       cfg=icf_n{iz}(2:end-1,3:end); 
+    if size(icf_op{iz},1)==54  % ??
+       cfg=icf_op{iz}(2:end-1,3:end); 
        save('config.cfg', 'cfg', '-ASCII','-double');
     else
-       cfg=icf_n{iz}(1:end-1,3:end); 
+       cfg=icf_op{iz}(1:end-1,3:end); 
        save('config.cfg', 'cfg', '-ASCII','-double');
     end
     tmp_file=sprintf('config%s.cfg',Cal.brw_str{iz});       
     copyfile('config.cfg',fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},tmp_file));
     delete('config.cfg');
   
-    if size(icfn{iz},1)==54 %??
-       cfg=icfn{iz}(2:end-1,3:end);
+    if size(icf_a{iz},1)==54 %??
+       cfg=icf_a{iz}(2:end-1,3:end);
        save('config_a.cfg', 'cfg', '-ASCII','-double');
     else
-       cfg=icfn{iz}(1:end-1,3:end);
+       cfg=icf_a{iz}(1:end-1,3:end);
        save('config_a.cfg', 'cfg', '-ASCII','-double');
     end             
     tmp_file=sprintf('config%s_a.cfg',Cal.brw_str{iz});
@@ -132,14 +115,11 @@ for iz=1:Cal.n_brw
   catch exception
         fprintf('%s Brewer%s\n',exception.message,Cal.brw_name{iz});          
   end
-  Cal.events{iz}=events_n{iz}(:,2:end);
-  Cal.events_n{iz}=events_n{iz};
+  Cal.events{iz}=events{iz}(:,2:end);
   Cal.events_text{iz}=events_text{iz};
   Cal.events_raw{iz}=events_raw{iz};
   Cal.incidences_text{iz}=incidences_text{iz};
 end
-%rewrtite
-icf_op=icf_n; icf_a =icfn;
 
 %% Operative is 1st, alternative is 2nd
   brw_config_files={
