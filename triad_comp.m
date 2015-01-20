@@ -6,29 +6,20 @@ clear all;
 file_setup='triad_setup';
 run(fullfile('.','cfg',file_setup));     % configuracion por defecto
 
-Cal.Date.day0=datenum(2013,11,10);  
+Cal.Date.day0=datenum(2014,12,20);  
 Cal.Date.dayend=datenum(2014,12,31); 
 Date.CALC_DAYS=Cal.Date.day0:Cal.Date.dayend;
 Cal.Date=Date;
 
 Cal.file_save  = 'triad_comp_chk'; 
-% Cal.file_latex = fullfile('..','latex'); 
-% mkdir(Cal.file_latex);
-% Cal.dir_figs   = fullfile(Cal.file_latex,filesep(),'figures'); 
-% mkdir(Cal.dir_figs);
 
 Cal.analyzed_brewer=1:3;
 Cal.reference_brw=1:3;
 
-
 %% ALL THE CONFIGURATIONS CONSTANTS HERE
-
-
 osc_interval=[400,700,1000,1200];
 Cal.brw=[157 183 185]; 
-
 Cal.sl_c=[1,1,1];
-
 
 % Generic
 % Langley processing
@@ -50,6 +41,22 @@ grp_def=@(x) {year(x) weeknum(x)};
 %update the information on config
 save(Cal.file_save,'-append','Cal');
 
+%% READ Brewer Summaries
+Cal.n_ref=Cal.n_ref;
+ for i=Cal.n_ref
+    ozone_raw{i}={};   hg{i}={};   ozone_sum{i}={};  ozone_raw0{i}={};  
+    config{i}={};      sl{i}={};   ozone_ds{i}={};   sl_cr{i}={};    
+
+    [ozone,log_,missing_]=read_bdata(i,Cal);
+    
+    ozone_sum{i}=ozone.ozone_sum;
+    config{i}=ozone.config;
+    ozone_ds{i}=ozone.ozone_ds;
+    ozone_raw{i}=ozone.raw;
+    ozone_raw0{i}=ozone.raw0;
+    sl{i}=ozone.sl;       % first calibration / bfiles
+    sl_cr{i}=ozone.sl_cr; % recalc. with 2? configuration
+ end
 
 %% Update Brewer Summaries
 load(Cal.file_save);
@@ -78,25 +85,19 @@ load(Cal.file_save);
     ozone_union=cell(length(C),1);
     ozone_union(ib)=ozone_.ozone_ds;
     ozone_union(ia)=ozone_ds{i};
-    ozone_ds{i}=ozone_union;
-    
-    
+    ozone_ds{i}=ozone_union;        
     
     %ozone_raw{i}=ozone.raw;
     ozone_union=cell(length(C),1);
     ozone_union(ib)=ozone_.raw;
     ozone_union(ia)=ozone_raw{i};
     ozone_raw{i}=ozone_union;
-    
-      
-    
+          
     %ozone_raw0{i}=ozone.raw0;
     ozone_union=cell(length(C),1);
     ozone_union(ib)=ozone_.raw0;
     ozone_union(ia)=ozone_raw0{i};
-    ozone_raw0{i}=ozone_union;
-    
-      
+    ozone_raw0{i}=ozone_union;          
        
     %sl{i}=ozone.sl;       % first calibration / bfiles
     processed_days=fix(cellfun(@(x) x(1,1),sl{i},'un',true));
@@ -107,9 +108,7 @@ load(Cal.file_save);
     ozone_union(ib)=ozone_.sl;
     ozone_union(ia)=sl{i};
     sl{i}=ozone_union;
-    
-      
-       
+                
     %sl_cr{i}=ozone.sl_cr; % recalc. with 2? configuration
     updated_days=fix(cellfun(@(x) x(1,1),ozone_.sl_cr,'un',true));
     [C,ia,ib]=union(processed_days,updated_days,'sorted');
@@ -117,14 +116,9 @@ load(Cal.file_save);
     ozone_union=cell(length(C),1);
     ozone_union(ib)=ozone_.sl_cr;
     ozone_union(ia)=sl_cr{i};
-    sl_cr{i}=ozone_union;
-    
-    
-    
-    
-    
+    sl_cr{i}=ozone_union;                   
  end
-save(Cal.file_save);
+% save(Cal.file_save);
 
 %% Configs: Operative
 for brw=1:3
@@ -156,11 +150,11 @@ for ii=union(Cal.analyzed_brewer,Cal.reference_brw)
     sl_mov_n{ii}={}; sl_median_n{ii}={}; sl_out_n{ii}={}; R6_n{ii}={};
 % old instrumental constants
     [sl_mov_o{ii},sl_median_o{ii},sl_out_o{ii},R6_o{ii}]=sl_report_jday(ii,sl,Cal.brw_str,...
-                               'outlier_flag',1,'diaj_flag',0,'events_raw',events_raw{ii},...
+                               'outlier_flag',0,'diaj_flag',0,'events_raw',events_raw{ii},...
                                'hgflag',1,'fplot',0);
 % new instrumental constants
     [sl_mov_n{ii},sl_median_n{ii},sl_out_n{ii},R6_n{ii}]=sl_report_jday(ii,sl_cr,Cal.brw_str,...
-                               'outlier_flag',1,'diaj_flag',0,'events_raw',events_raw{ii},...
+                               'outlier_flag',0,'diaj_flag',0,'events_raw',events_raw{ii},...
                                'hgflag',1,'fplot',0);
 end
 save(Cal.file_save,'-APPEND','sl_mov_o','sl_median_o','sl_out_o','R6_o',...
@@ -182,15 +176,12 @@ save(Cal.file_save,'-APPEND','A','ETC','F_corr','SL_B','SL_R','cfg','SL_flag',..
                              'summary_old','summary_orig_old','summary','summary_orig');
 
 %% Comparacion Operativa.
-
 [ref_op,ratio_ref_op]=join_summary(Cal,summary_old,Cal.reference_brw,Cal.analyzed_brewer,5);
 
 % ratio_ref_plots
-[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref);
+[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref_op);
  
 %% Comparacion Alternativa
-
-
 [ref_alt,ratio_ref_alt]=join_summary(Cal,summary,Cal.reference_brw,Cal.analyzed_brewer,5);
 
 % ratio_ref_plots
