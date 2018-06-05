@@ -14,7 +14,7 @@ Cal.analyzed_brewer=1:3; Cal.reference_brw=1:3;
 startup
 %Cal.reference_brw=1;
 %% Ozone deviations
-year_period=2005:2016
+year_period=2005:2018
 Cal.sl_c=[1,1,1];
 %Cal.path_root='C:\CODE\iberonesia\RBCC_E\Triad'
 % loading data (summaries)
@@ -169,7 +169,7 @@ for brw=1:length(Cal.brw)
 end
 
 %% Langley results
-year_period=2005:2016;
+year_period=2005:2018;
 
 % loading data (Langley results)
 lang=cell(1,length(Cal.brw));
