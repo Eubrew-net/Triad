@@ -16,7 +16,7 @@ startup
 %% Ozone deviations
 year_period=2005:2016
 Cal.sl_c=[1,1,1];
-Cal.path_root='C:\CODE\iberonesia\RBCC_E\Triad'
+%Cal.path_root='C:\CODE\iberonesia\RBCC_E\Triad'
 % loading data (summaries)
 summ_op=cell(1,length(Cal.brw));
 summ_alt=cell(1,length(Cal.brw));
