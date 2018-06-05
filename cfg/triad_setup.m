@@ -10,12 +10,14 @@ else
 if ispc
    Cal.path_root=fullfile(cell2mat(regexpi(pwd,'^[A-Z]:', 'match')),'CODE','iberonesia');
 else
-   Cal.path_root=fullfile('~',cell2mat(regexpi(pwd,'^[A-Z]:', 'match')),'CODE','iberonesia');
+   %/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad 
+   Cal.path_root=fullfile('/','Users','aredondas','CODE','rbcce.aemet.es','iberonesia');
+   disp(Cal.path_root)
 end
 end
 path(genpath(fullfile(Cal.path_root,'matlab')),path);
-Cal.file_save='calizo_2014.mat';
-Cal.campaign='Izana 2014 (Canary Islands, Spain)';
+Cal.file_save='triad_2018.mat';
+Cal.campaign='Izana 2018 (Canary Islands, Spain)';
 
 
 %% Station
@@ -39,7 +41,7 @@ Date.dayend=365;
 Date.cal_year=2014;
 Date.cal_month=04;
 
-Cal.path_root=fullfile(Cal.path_root,'RBCC_E',num2str(Date.cal_year));
+Cal.path_root=fullfile(Cal.path_root,'RBCC_E');
 
 Date.CALC_DAYS=Date.day0:Date.dayend;
 Date.range=[Date.CALC_DAYS(1),Date.CALC_DAYS(end)]; 
@@ -74,19 +76,22 @@ Cal.sl_c_blind=[1,  1,  1];
 
 %% Brewer configuration files. Eventos e Incidencias
 icf_op=cell(1,length(Cal.n_brw)); icf_a=cell(1,length(Cal.n_brw));
-events=cell(1,length(Cal.n_brw)); events_text=cell(1,length(Cal.n_brw)); events_raw=cell(1,length(Cal.n_brw));
+events=cell(1,length(Cal.n_brw)); events_text=cell(1,length(Cal.n_brw)); 
+events_raw=cell(1,length(Cal.n_brw));
 incidences=cell(1,length(Cal.n_brw)); incidences_text=cell(1,length(Cal.n_brw)); incidences_raw=cell(1,length(Cal.n_brw));
+
+
 for iz=1:Cal.n_brw
     icf_op{iz}=[]; icf_a{iz}=[];
  try   
     if iz<4 %reference
-       icf_op{iz}=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
+       icf_op{iz}=xlsread(fullfile(Cal.path_root,'configs',['icf',Cal.brw_str{iz},'.xls']),...
                          ['icf.',Cal.brw_str{iz}],'','basic');      
-       icf_a{iz}=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
+       icf_a{iz}=xlsread(fullfile(Cal.path_root,'configs',['icf',Cal.brw_str{iz},'.xls']),...
                          ['icf_a.',Cal.brw_str{iz}],'','basic');                     
-       [events{iz},events_text{iz},events_raw{iz}]=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
+       [events{iz},events_text{iz},events_raw{iz}]=xlsread(fullfile(Cal.path_root,'configs',['icf',Cal.brw_str{iz},'.xls']),...
                                                              ['Eventos.',Cal.brw_str{iz}],'','basic');
-       [incidences{iz},incidences_text{iz},incidences_raw{iz}]=xlsread(fullfile(Cal.path_root,'..','configs',['icf',Cal.brw_str{iz},'.xls']),...
+       [incidences{iz},incidences_text{iz},incidences_raw{iz}]=xlsread(fullfile(Cal.path_root,'configs',['icf',Cal.brw_str{iz},'.xls']),...
                                                              ['Incidencias.',Cal.brw_str{iz}],'','basic');
     end   
     
@@ -98,7 +103,7 @@ for iz=1:Cal.n_brw
        save('config.cfg', 'cfg', '-ASCII','-double');
     end
     tmp_file=sprintf('config%s.cfg',Cal.brw_str{iz});       
-    copyfile('config.cfg',fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},tmp_file));
+    copyfile('config.cfg',fullfile(Cal.path_root,'Triad',tmp_file));
     delete('config.cfg');
   
     if size(icf_a{iz},1)==54 %??
@@ -109,7 +114,7 @@ for iz=1:Cal.n_brw
        save('config_a.cfg', 'cfg', '-ASCII','-double');
     end             
     tmp_file=sprintf('config%s_a.cfg',Cal.brw_str{iz});
-    copyfile('config_a.cfg',fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},tmp_file));
+    copyfile('config_a.cfg',fullfile(Cal.path_root,'Triad',tmp_file));
     delete('config_a.cfg');
   
   catch exception
@@ -123,9 +128,9 @@ end
 
 %% Operative is 1st, alternative is 2nd
   brw_config_files={
-    '..\157\config157.cfg','..\157\config157_a.cfg','0350','0350';
-    '..\183\config183.cfg','..\183\config183_a.cfg','0335','0335';
-    '..\185\config185.cfg','..\185\config185_a.cfg','0305','0305';
+    'config157.cfg','config157_a.cfg','0350','0350';
+    'config183.cfg','config183_a.cfg','0335','0335';
+    'config185.cfg','config185_a.cfg','0305','0305';
    };
 
   Cal.ETC_C={
@@ -134,10 +139,10 @@ end
              [0,0,0,11,9,0]         %185
             };
 
-%%
-pa=repmat(cellstr([Cal.path_root,filesep(),'bfiles']),Cal.n_brw,2);
+%
+pa=repmat(cellstr([Cal.path_root,filesep(),'Triad']),Cal.n_brw,2);
+%pa=cellfun(@fullfile,pa,[mmcellstr(sprintf('%03d|',Cal.brw)),mmcellstr(sprintf('%03d|',Cal.brw))],'UniformOutput',0);
 
-pa=cellfun(@fullfile,pa,[mmcellstr(sprintf('%03d|',Cal.brw)),mmcellstr(sprintf('%03d|',Cal.brw))],'UniformOutput',0);
 brw_config_files(:,1:2)=cellfun(@fullfile,pa,brw_config_files(:,1:2),'UniformOutput',0);
 if isunix
  brw_config_files=strrep(brw_config_files,'\',filesep());
