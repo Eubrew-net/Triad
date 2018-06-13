@@ -1,5 +1,5 @@
 % options_pub.outputDir=fullfile(pwd,'html'); options_pub.showCode=false;
-% close all; publish(fullfile(pwd,'proccesing.m'),options_pub);
+% close all; publish(fullfile(pwd,'proccesing_langley.m'),options_pub);
 
 %% Processing things: Brewer setup
 clear all;
@@ -11,10 +11,9 @@ Cal.dir_figs   = fullfile(Cal.file_latex,filesep(),'figures'); mkdir(Cal.dir_fig
 
 Cal.brw=[157 183 185];
 Cal.analyzed_brewer=1:3; Cal.reference_brw=1:3;
-startup
 %Cal.reference_brw=1;
 %% Ozone deviations
-year_period=2005:2017
+year_period=2005:2018
 Cal.sl_c=[1,1,1];
 %Cal.path_root='C:\CODE\iberonesia\RBCC_E\Triad'
 % loading data (summaries)
@@ -22,12 +21,12 @@ summ_op=cell(1,length(Cal.brw));
 summ_alt=cell(1,length(Cal.brw));
 for brw=1:length(Cal.brw)    
     for yr=1:length(year_period) 
-        b=year_period(yr)
+        b=year_period(yr);
         %dir_summ=fullfile(Cal.path_root,'..',num2str(year_period(yr)),'Triad','Langley');
-        dir_summ=fullfile(Cal.path_root,'Triad',num2str(year_period(yr)),'Triad')
+        dir_summ=fullfile(Cal.path_root,'Triad',num2str(year_period(yr)),'Triad');
         file_op=dir(fullfile(dir_summ,strcat('summary_old_Brw',num2str(Cal.brw(brw)),'*')));
         a=load(fullfile(dir_summ,file_op.name));
-        b=[]
+        b=[];
         if size(a,1)==1
             for j=0:1:(size(a,2)/15)-1
                 b=[b;a(1,1+j*15:15+j*15)];
@@ -38,7 +37,7 @@ for brw=1:length(Cal.brw)
         end
         file=dir(fullfile(dir_summ,strcat('summary_Brw',num2str(Cal.brw(brw)),'*')));
         a=load(fullfile(dir_summ,file.name));
-        b=[]
+        b=[];
         if size(a,1)==1
             for j=0:1:(size(a,2)/15)-1
                 b=[b;a(1,1+j*15:15+j*15)];
@@ -61,7 +60,8 @@ end
 
 % ploteo: Comparacion Operativa.
 [ref_op,ratio_ref_op]=join_summary(Cal,summ_op,Cal.reference_brw,Cal.analyzed_brewer,5,...
-                                                 'date_range',[datenum(2005,1,1) datenum(2016,12,31)]);
+                                                 'date_range',[datenum(2005,1,1) datenum(2025,12,31)]);
+                  % Poniendo hasta 2025 se tiene la gráfica para los próximos años                             
 %                                                  'date_range',[datenum(2014,6,15) datenum(2014,8,17)]);
 [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref_op,'plot_smooth',0);
 
@@ -116,9 +116,9 @@ close all
 for brw=1:length(Cal.brw)
     clear ddd
     figure; set(gcf,'Tag',sprintf('R6_%s',Cal.brw_str{brw}));
-    ddd=(summ_op{brw}(:,end-1)-summ_op{brw}(:,end))/(2*0.3995)
-    aaa=find(abs(ddd(:,1))>=100)
-    ddd(aaa,1)=nan
+    ddd=(summ_op{brw}(:,end-1)-summ_op{brw}(:,end))/(2*0.3995);
+    aaa=find(abs(ddd(:,1))>=100);
+    ddd(aaa,1)=nan;
     % Gráfica con 2 ejes Y
     yyaxis left
     plot(summ_op{brw}(:,1),summ_op{brw}(:,end),'sg'); hold on
@@ -127,24 +127,24 @@ for brw=1:length(Cal.brw)
     %plot(summ_op{brw}(:,1),summ_op{brw}(:,end-1),'-'); set(st,'LineWidth',4)
     st=stairs(summ_op{brw}(:,1),summ_op{brw}(:,end-1),'-'); set(st,'LineWidth',2);hold on;
     if brw==1
-        aa=events{1}
-        dd=[10, 16, 21, 36,38,40,42,44,46,51]
-        X=[aa(dd,2),aa(dd,2)]
+        aa=events{1};
+        dd=[10, 16, 21, 36,38,40,42,44,46,51];
+        X=[aa(dd,2),aa(dd,2)];
         Y=[330 375]
         line(X,Y,'color','red','LineWidth',1,'lineStyle','-', 'Marker','none'); grid;
     end
     if brw==2
-        aa=events{2}
-        dd=[2, 3, 5, 9, 10,13,14,15,16,23,32,33,36,37,39,40,43,46,47,48,50]
-        X=[aa(dd,2),aa(dd,2)]
-        Y=[300 500]
+        aa=events{2};
+        dd=[2, 3, 5, 9, 10,13,14,15,16,23,32,33,36,37,39,40,43,46,47,48,50];
+        X=[aa(dd,2),aa(dd,2)];
+        Y=[300 500];
         line(X,Y,'color','red','LineWidth',1,'lineStyle','-', 'Marker','none'); grid;
     end
     if brw==3
-        aa=events{3}
-        dd=[4,14,23,30,36,44,47,49,50,53,58,70]
-        X=[aa(dd,2),aa(dd,2)]
-        Y=[200 360]
+        aa=events{3};
+        dd=[4,14,23,30,36,44,47,49,50,53,58,70];
+        X=[aa(dd,2),aa(dd,2)];
+        Y=[200 360];
         line(X,Y,'color','red','LineWidth',1,'lineStyle','-', 'Marker','none'); grid;
     end
     yyaxis right
