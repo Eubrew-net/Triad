@@ -1,12 +1,12 @@
 function [mensual_A2]=mensual_2(media)
 
-% Función empleada para el ajuste Histograma y función gaussiana. 
+% Funciï¿½n empleada para el ajuste Histograma y funciï¿½n gaussiana. 
 % Futuro Paper de la Triada.
 
-%Parámetros entrada
+%Parï¿½metros entrada
     
-    % media=celda que contiene, media{}=[año, día, A2, A3, media].
-    % para todas las medidas y las simultáneas.
+    % media=celda que contiene, media{}=[aï¿½o, dï¿½a, A2, A3, media].
+    % para todas las medidas y las simultï¿½neas.
     
     % EjeX1 y EjeX2 son los valores de corte para los histogramas
 
@@ -16,14 +16,14 @@ medias=[media{1}(:,1:3),media{2}(:,3),media{3}(:,3)]
 
 mensual=[]
 contador=[];
-for ano=2016:-1:2005
+for ano=2019:-1:2005
     for j=12:-1:1
          a=find(medias(:,1)==ano & medias(:,2)>=periodo(j,1) & medias(:,2)<=periodo(j,2))
          datos=[medias(a,:),sum(isnan(medias(a,:)),2)]
          a=find(datos(:,6)==0)
          contador=[size(a,1),contador]
          if size(a,1)>=3
-            seleccinados=datos(a,:) %Días y ozono en que los brewers tiene medidas simultáneas.
+            seleccinados=datos(a,:) %Dï¿½as y ozono en que los brewers tiene medidas simultï¿½neas.
             % Calculamos el valor medio Me
             Me157=[ano,j,mean(seleccinados(:,3))]; 
             Me183=[ano,j,mean(seleccinados(:,4))];
@@ -42,7 +42,7 @@ b1=[medias(a,1:3),medias(a,5)]
 datos=[b1,sum(isnan(b1),2)]
 a=find(datos(:,5)==0)
 if size(a,1)>=3
-    seleccinados=datos(a,:) %Días y ozono en que los brewers tiene medidas simultáneas.
+    seleccinados=datos(a,:) %Dï¿½as y ozono en que los brewers tiene medidas simultï¿½neas.
     Me157=mean(seleccinados(:,3));
     Me185=mean(seleccinados(:,4));
     a=find(mensual(:,1)==2005 & mensual(:,2)==12);
@@ -55,7 +55,7 @@ for j=1:1:7
     datos=[b1,sum(isnan(b1),2)]
     a=find(datos(:,5)==0)
     if size(a,1)>=3
-        seleccinados=datos(a,:) %Días y ozono en que los brewers tiene medidas simultáneas.
+        seleccinados=datos(a,:) %Dï¿½as y ozono en que los brewers tiene medidas simultï¿½neas.
         Me157=mean(seleccinados(:,3));
         Me185=mean(seleccinados(:,4));
         a=find(mensual(:,1)==2006 & mensual(:,2)==j);
@@ -64,7 +64,7 @@ for j=1:1:7
 end
 
 Emensual=[]
-for ano=2016:-1:2005
+for ano=2019:-1:2005
     for j=12:-1:1
         a=find(mensual(:,1)==ano & mensual(:,2)==j)
         if isempty(a)==0
