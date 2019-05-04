@@ -31,7 +31,7 @@ for j=1:1:3
     %endDate = datenum('01-01-2017');
     %xData = linspace(startDate,endDate,144);
     datetick('x','yyyy','keeplimits')
-    xlim([datenum(2005,5,1),datenum(2017,1,1)])
+    xlim([datenum(2005,5,1),datenum(2020,1,1)])
     ylim([0.985 1.015])
 end
 
