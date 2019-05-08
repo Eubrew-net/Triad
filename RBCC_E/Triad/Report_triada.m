@@ -8,7 +8,7 @@
 clear all    
 %addpath(genpath('c:\Code\iberonesia\Matlab'));
 addpath(genpath(fullfile('~','CODE','rbcce.aemet.es','iberonesia','matlab')));
-path_root=(fullfile('~','CODE','rbcce.aemet.es','iberonesia','RBCC_E','Triad'))
+path_root=(fullfile('~','CODE','campaigns','Triad'))
 %warning('off')
 
 %Cargamos los datos/a�os y los agrupamos por brewer en la misma variable.
@@ -399,8 +399,9 @@ end
 
 clear j; clear aux; clear a;
 save workspace_5min_report
-%% Pintamos los resultados del ajuste de Fieletov
 
+%% Pintamos los resultados del ajuste de Fieletov
+load workspace_5min_report
 % HISTROGRAMA ERROR DIARIO (solo empleamos los datos cuando los tres brewers han medido ese dia)
 
 [Histograma,error,error_relativo]=histog(media,1500,600,550,550)
@@ -537,7 +538,7 @@ end
 
 %mensual(85:144,:)=[]
 %Emensual(1:60,:)=[]
-%save Emensual.mat Emensual
+%% save Emensual.mat Emensual
 figure
 subplot(2,1,1)
 ejex=datenum(mensual(:,1),1,1);
@@ -557,7 +558,7 @@ xlim([datenum(2005,7,1),datenum(2019,1,1)])
 
 %title(sprintf('O3 Monthly in the Period 2005-2018'));
 subplot(2,1,2)
-ejex(:,1)=datenum(Emensual(:,1),Emensual(:,2),1);
+ejex=datenum(Emensual(:,1),Emensual(:,2),1);
 plot(ejex,Emensual(:,7),'+-',ejex,Emensual(:,8),'o-',ejex,Emensual(:,9),'*-','linewidth',2);
 legend('BR#157','BR#183','BR#185');
 startDate = datenum('01-07-2005');
