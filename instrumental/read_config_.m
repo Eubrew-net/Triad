@@ -33,7 +33,8 @@ for i=Cal.n_ref
       fprintf('\nBrewer %s: Operative Config.\n',Cal.brw_name{i});
       events_cfg_op=getcfgs(Cal.Date.CALC_DAYS,OP_config);
       op_cfg{i}=display_table(events_cfg_op.data(1:end,:),cellstr(datestr(events_cfg_op.data(1,:),1))',12,'.5g',events_cfg_op.legend(1:end));
-      events{i}=getevents(Cal,'grp','events');
+      %Cal.n_inst=i;
+      %events{i}=getevents(Cal,'grp','events');
     catch exception
       fprintf('%s, brewer: %s\n',exception.message,Cal.brw_str{i});
     end
@@ -54,6 +55,7 @@ for i=Cal.n_ref
        end
        events_cfg_chk=getcfgs(Cal.Date.CALC_DAYS,ALT_config);
        fprintf('\nBrewer %s: Second Config.\n',Cal.brw_name{i});
+       Cal.n_inst=i;
        events{i}=getevents(Cal,'grp','events');
        alt_cfg{i}=display_table(events_cfg_chk.data(1:end,:),cellstr(datestr(events_cfg_chk.data(1,:),'mmmyy-dd'))',12,'.5g',events_cfg_chk.legend(1:end));
        
@@ -66,9 +68,14 @@ for i=Cal.n_ref
      disp(events{i}.labels)
      
      try
-          alt_cfg{i}.label=events{i}.labels
+          alt_cfg{i}.Properties.VariableNames=str2name(events{i}.labels)';
+          
+          
+          disp(rows2vars(alt_cfg{i}(1,:)))
+          op_cfg{i}.Properties.VariableNames=str2name(events{i}.labels)';
+          disp(rows2vars(op_cfg{i}))
      catch
-          disp('events and config not agree')
+          warning('events and config not agree')
           events{i}.labels
           %events{i}.dates
           alt_cfg{i}(1,:)

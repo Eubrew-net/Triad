@@ -18,30 +18,41 @@ Cal.dir_figs   = fullfile(Cal.file_latex,filesep(),'figures');
 mkdir(Cal.dir_figs);
 mkdir(Cal.dir_tables);
 %load(Cal.file_save);
-%% READ Brewer Summaries
-% Cal.n_ref=Cal.n_ref;
-%  for i=1:Cal.n_brw
-%     ozone_raw{i}={};   hg{i}={};   ozone_sum{i}={};  ozone_raw0{i}={};
-%     config{i}={};      sl{i}={};   ozone_ds{i}={};   sl_cr{i}={};
-% 
-%     if i<=3
-%         [ozone,log_,missing_]=read_bdata(i,Cal);
-%     else
-%         [ozone,log_,missing_]=read_bdata(i,Cal,'/Users/aredondas/CODE/iberonesia/RBCC_E/2016/bdata');
-%     end
-%     % depuramos datos (ver incidencias en config. matrix)
-%     ozone=dep_data(Cal.incidences_text{i},ozone);
-% 
-%     ozone_sum{i}=ozone.ozone_sum;
-%     config{i}=ozone.config;
-%     ozone_ds{i}=ozone.ozone_ds;
-%     ozone_raw{i}=ozone.raw;
-%     ozone_raw0{i}=ozone.raw0;
-%     sl{i}=ozone.sl;       % first calibration / bfiles
-%     sl_cr{i}=ozone.sl_cr; % recalc. with 2? configuration
-%  end
-% save(Cal.file_save);
+if exist(Cal.file_save,'file')
+     save(Cal.file_save,'-append','Cal','events_raw'); % sobreescribe la configuracion
+     load(Cal.file_save);
+else
+    disp('clean');
+end
 
+
+
+% READ Brewer Summaries
+Cal.n_ref=Cal.n_ref;
+ for i=1:Cal.n_brw
+    ozone_raw{i}={};   hg{i}={};   ozone_sum{i}={};  ozone_raw0{i}={};
+    config{i}={};      sl{i}={};   ozone_ds{i}={};   sl_cr{i}={};
+
+    if i<=3
+        [ozone,log_,missing_]=read_bdata(i,Cal);
+    else
+        [ozone,log_,missing_]=read_bdata(i,Cal,'/Users/aredondas/CODE/iberonesia/RBCC_E/2016/bdata');
+    end
+    % depuramos datos (ver incidencias en config. matrix)
+    ozone=dep_data(Cal.incidences_text{i},ozone);
+
+    ozone_sum{i}=ozone.ozone_sum;
+    config{i}=ozone.config;
+    ozone_ds{i}=ozone.ozone_ds;
+    ozone_raw{i}=ozone.raw;
+    ozone_raw0{i}=ozone.raw0;
+    sl{i}=ozone.sl;       % first calibration / bfiles
+    sl_cr{i}=ozone.sl_cr; % recalc. with 2? configuration
+ end
+save(Cal.file_save);
+%%
+load(Cal.file_save,'ozone_sum','config','ozone_ds','ozone_raw','ozone_raw0','sl','sl_cr')
+%%
 %% Configs
 for i=Cal.n_ref
     %% Operative
@@ -150,7 +161,7 @@ end
 write_summary(Cal.brw(1:3),Cal.Date.cal_year,summary_old,summary,SL_R,SL_B);
 save(Cal.file_save,'-APPEND','A','ETC','F_corr','SL_B','SL_R','SL_corr_flag','cfg',...
                              'summary_old','summary_orig_old','summary','summary_orig');
-% Outliers? Los detectamos
+%% Outliers? Los detectamos
 ref=[];
 for ii=Cal.n_ref
     med=summary_old{ii}(:,[1 6]); meds=summary_old{ii}(:,[1 7]);
@@ -162,159 +173,159 @@ ploty(ref,'.'); grid
 legend(gca,Cal.brw_name{Cal.n_ref},'Location','NorthEast','Orientation','Horizontal');
 datetick('x',6,'Keeplimits','Keepticks'); title('DS Ozone'); ylabel('Ozone (DU)');
 
-%% Comparacion Operativa.
-% close all
-
-reference_brw=1:3; analyzed_brewer=[1 2 3];
-osc_interval=[400,700,1000,1200];
-Cal.analyzed_brewer=analyzed_brewer;
-Cal.sl_c=[0,0,0];
-
-Cal.brw=[157 183 185];
-% before, during and after huelva
-
-% BEFORE Iza?a
-[ref,ratio_ref]=join_summary(Cal,summary_old,reference_brw,analyzed_brewer,5,'date_range',datenum(2016,1,[1,175]));
-% ratio_ref_plots
-%outliers
-Cal.analyzed_brewer=[1,2,3];
-Cal.reference_brewer=[1,2,3];
-for jj=1:length(Cal.analyzed_brewer)
-[ratio_ref(:,jj+1),b,c]=deleteoutliers(ratio_ref(:,jj+1),0.05,1);
- disp(datestr(ratio_ref(b,1)))
- disp(c)
-end
-[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',0);
-
-[ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref,osc_interval);
-set(gcf,'Tag','osc_box_plot'); set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
-
-
-%%  DURING Iza?a
-sum_x=summary_old;
-%sum_x{2}=summary{2};
-[ref,ratio_ref]=join_summary(Cal,sum_x,1:2,1:2,5,'date_range',datenum(2016,1,[175,210]));
-% ratio_ref_plots
-Cal.analyzed_brewer=[1,2];
-Cal.reference_brewer=[1,2];
-
-%outliers
-for jj=1:length(Cal.analyzed_brewer)
-[ratio_ref(:,jj+1),b,c]=deleteoutliers(ratio_ref(:,jj+1),0.05,1);
- disp(datestr(ratio_ref(b,1)))
- disp(c)
-end
-
-[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',1);
-
-[ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref,osc_interval);
-set(gcf,'Tag','osc_box_plot');
-set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
-%%
-%%  DURING2
-sum_x=summary;
-[ref,ratio_ref]=join_summary(Cal,sum_x,[1:3],[1:3],5,'date_range',datenum(2016,1,[220,240]));
-% ratio_ref_plots
-Cal.analyzed_brewer=[1,2,3];
-Cal.reference_brewer=[1];
-
-%outliers
-for jj=1:length(Cal.analyzed_brewer)
-[ratio_ref(:,jj+1),b,c]=deleteoutliers(ratio_ref(:,jj+1),0.05,1);
- disp(datestr(ratio_ref(b,1)))
- disp(c)
-end
-
-[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',1);
-
-[ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref,osc_interval);
-set(gcf,'Tag','osc_box_plot');
-set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
-%% AFTER Iza?a
-[ref,ratio_ref]=join_summary(Cal,summary_old,1:3,1:3,5,'date_range',datenum(2016,1,[210,366]));
-% ratio_ref_plots
-Cal.analyzed_brewer=[1,2,3];
-Cal.reference_brewer=[1,2,3];
-%outliers
-for jj=1:length(Cal.analyzed_brewer)
-[ratio_ref(:,jj+1),b,c]=deleteoutliers(ratio_ref(:,jj+1),0.05,1);
- disp(datestr(ratio_ref(b,1)))
- disp(c)
-end
-
-[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',0);
-
-[ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref,osc_interval);
-set(gcf,'Tag','osc_box_plot');
-set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
-%% ATMOZ Iza?a
-[ref,ratio_ref]=join_summary(Cal,summary_old,1:3,1:3,5,'date_range',datenum(2016,1,[240,280]));
-% ratio_ref_plots
-Cal.analyzed_brewer=[1,2,3];
-Cal.reference_brewer=[1,2,3];
-%outliers
-for jj=1:length(Cal.analyzed_brewer)
-[ratio_ref(:,jj+1),b,c]=deleteoutliers(ratio_ref(:,jj+1),0.05,1);
- disp(datestr(ratio_ref(b,1)))
- disp(c)
-end
-
-[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',0);
-
-[ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref,osc_interval);
-set(gcf,'Tag','osc_box_plot');
-set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
-
-
-%% Comparacion Alternativa
-close all
-
-reference_brw=[1 2 3]; analyzed_brewer=[1 2 3];
-osc_interval=[400,700,1000,1200];
-Cal.analyzed_brewer=analyzed_brewer;
-Cal.sl_c=[0,0,0];
-
-
-% BEFORE IZa?a
-[ref,ratio_ref_alt]=join_summary(Cal,summary,reference_brw,analyzed_brewer,5,'date_range',datenum(2016,1,[1,175]));
-% ratio_ref_plots
-for jj=1:length(Cal.analyzed_brewer)
-[ratio_ref_alt(:,jj+1),b,c]=deleteoutliers(ratio_ref_alt(:,jj+1),0.05,1);
- disp(datestr(ratio_ref_alt(b,1)))
- disp(c)
-end
-
-[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref_alt,'plot_smooth',0);
-[ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref_alt,osc_interval);
-set(gcf,'Tag','osc_box_plot'); set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
-
-%%  DURING Iza?a
-[ref,ratio_ref_al]=join_summary(Cal,summary,1:3,1:3,5,'date_range',datenum(2016,1,[250,273]));
-% ratio_ref_plots
-Cal.analyzed_brewer=[1,2,3];
-Cal.reference_brewer=[1,2,3];
-[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref_al,'plot_smooth',0);
-[ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref_al,osc_interval);
- set(gcf,'Tag','osc_box_plot'); set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
-
-
-%% AFTER HUELVA
-[ref,ratio_ref_aln]=join_summary(Cal,summary,1:3,1:3,5,'date_range',datenum(2016,1,[210,366]));
-% ratio_ref_plots
-Cal.analyzed_brewer=[1,2,3];
-Cal.reference_brewer=[1,2,3];
-[f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref_aln,'plot_smooth',0);
-
-
-[ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref_aln,osc_interval);
- 
- 
- 
- set(gcf,'Tag','osc_box_plot'); set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
-
-% [ref,ratio_ref]=join_summary(Cal,summary,reference_brw,analyzed_brewer,10);
-% % osc table
-% [ratio_osc_table,osc_matrix,osc_stats]=osc_table(Cal,ratio_ref,osc_interval);
-% set(gcf,'Tag','osc_box_plot'); set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
+% %% Comparacion Operativa.
+% % close all
+% 
+% reference_brw=1:3; analyzed_brewer=[1 2 3];
+% osc_interval=[400,700,1000,1200];
+% Cal.analyzed_brewer=analyzed_brewer;
+% Cal.sl_c=[0,0,0];
+% 
+% Cal.brw=[157 183 185];
+% % before, during and after huelva
+% 
+% % BEFORE Iza?a
+% [ref,ratio_ref]=join_summary(Cal,summary_old,reference_brw,analyzed_brewer,5,'date_range',datenum(2016,1,[1,175]));
 % % ratio_ref_plots
+% %outliers
+% Cal.analyzed_brewer=[1,2,3];
+% Cal.reference_brewer=[1,2,3];
+% for jj=1:length(Cal.analyzed_brewer)
+% [ratio_ref(:,jj+1),b,c]=deleteoutliers(ratio_ref(:,jj+1),0.05,1);
+%  disp(datestr(ratio_ref(b,1)))
+%  disp(c)
+% end
 % [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',0);
+% 
+% [ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref,osc_interval);
+% set(gcf,'Tag','osc_box_plot'); set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
+% 
+% 
+% %%  DURING Iza?a
+% sum_x=summary_old;
+% %sum_x{2}=summary{2};
+% [ref,ratio_ref]=join_summary(Cal,sum_x,1:2,1:2,5,'date_range',datenum(2016,1,[175,210]));
+% % ratio_ref_plots
+% Cal.analyzed_brewer=[1,2];
+% Cal.reference_brewer=[1,2];
+% 
+% %outliers
+% for jj=1:length(Cal.analyzed_brewer)
+% [ratio_ref(:,jj+1),b,c]=deleteoutliers(ratio_ref(:,jj+1),0.05,1);
+%  disp(datestr(ratio_ref(b,1)))
+%  disp(c)
+% end
+% 
+% [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',1);
+% 
+% [ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref,osc_interval);
+% set(gcf,'Tag','osc_box_plot');
+% set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
+% %%
+% %%  DURING2
+% sum_x=summary;
+% [ref,ratio_ref]=join_summary(Cal,sum_x,[1:3],[1:3],5,'date_range',datenum(2016,1,[220,240]));
+% % ratio_ref_plots
+% Cal.analyzed_brewer=[1,2,3];
+% Cal.reference_brewer=[1];
+% 
+% %outliers
+% for jj=1:length(Cal.analyzed_brewer)
+% [ratio_ref(:,jj+1),b,c]=deleteoutliers(ratio_ref(:,jj+1),0.05,1);
+%  disp(datestr(ratio_ref(b,1)))
+%  disp(c)
+% end
+% 
+% [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',1);
+% 
+% [ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref,osc_interval);
+% set(gcf,'Tag','osc_box_plot');
+% set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
+% %% AFTER Iza?a
+% [ref,ratio_ref]=join_summary(Cal,summary_old,1:3,1:3,5,'date_range',datenum(2016,1,[210,366]));
+% % ratio_ref_plots
+% Cal.analyzed_brewer=[1,2,3];
+% Cal.reference_brewer=[1,2,3];
+% %outliers
+% for jj=1:length(Cal.analyzed_brewer)
+% [ratio_ref(:,jj+1),b,c]=deleteoutliers(ratio_ref(:,jj+1),0.05,1);
+%  disp(datestr(ratio_ref(b,1)))
+%  disp(c)
+% end
+% 
+% [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',0);
+% 
+% [ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref,osc_interval);
+% set(gcf,'Tag','osc_box_plot');
+% set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
+% %% ATMOZ Iza?a
+% [ref,ratio_ref]=join_summary(Cal,summary_old,1:3,1:3,5,'date_range',datenum(2016,1,[240,280]));
+% % ratio_ref_plots
+% Cal.analyzed_brewer=[1,2,3];
+% Cal.reference_brewer=[1,2,3];
+% %outliers
+% for jj=1:length(Cal.analyzed_brewer)
+% [ratio_ref(:,jj+1),b,c]=deleteoutliers(ratio_ref(:,jj+1),0.05,1);
+%  disp(datestr(ratio_ref(b,1)))
+%  disp(c)
+% end
+% 
+% [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',0);
+% 
+% [ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref,osc_interval);
+% set(gcf,'Tag','osc_box_plot');
+% set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
+% 
+% 
+% %% Comparacion Alternativa
+% close all
+% 
+% reference_brw=[1 2 3]; analyzed_brewer=[1 2 3];
+% osc_interval=[400,700,1000,1200];
+% Cal.analyzed_brewer=analyzed_brewer;
+% Cal.sl_c=[0,0,0];
+% 
+% 
+% % BEFORE IZa?a
+% [ref,ratio_ref_alt]=join_summary(Cal,summary,reference_brw,analyzed_brewer,5,'date_range',datenum(2016,1,[1,175]));
+% % ratio_ref_plots
+% for jj=1:length(Cal.analyzed_brewer)
+% [ratio_ref_alt(:,jj+1),b,c]=deleteoutliers(ratio_ref_alt(:,jj+1),0.05,1);
+%  disp(datestr(ratio_ref_alt(b,1)))
+%  disp(c)
+% end
+% 
+% [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref_alt,'plot_smooth',0);
+% [ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref_alt,osc_interval);
+% set(gcf,'Tag','osc_box_plot'); set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
+% 
+% %%  DURING Iza?a
+% [ref,ratio_ref_al]=join_summary(Cal,summary,1:3,1:3,5,'date_range',datenum(2016,1,[250,273]));
+% % ratio_ref_plots
+% Cal.analyzed_brewer=[1,2,3];
+% Cal.reference_brewer=[1,2,3];
+% [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref_al,'plot_smooth',0);
+% [ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref_al,osc_interval);
+%  set(gcf,'Tag','osc_box_plot'); set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
+% 
+% 
+% %% AFTER HUELVA
+% [ref,ratio_ref_aln]=join_summary(Cal,summary,1:3,1:3,5,'date_range',datenum(2016,1,[210,366]));
+% % ratio_ref_plots
+% Cal.analyzed_brewer=[1,2,3];
+% Cal.reference_brewer=[1,2,3];
+% [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref_aln,'plot_smooth',0);
+% 
+% 
+% [ratio_osc_table,osc_matrix]=osc_table(Cal,ratio_ref_aln,osc_interval);
+%  
+%  
+%  
+%  set(gcf,'Tag','osc_box_plot'); set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
+% 
+% % [ref,ratio_ref]=join_summary(Cal,summary,reference_brw,analyzed_brewer,10);
+% % % osc table
+% % [ratio_osc_table,osc_matrix,osc_stats]=osc_table(Cal,ratio_ref,osc_interval);
+% % set(gcf,'Tag','osc_box_plot'); set(findobj(gcf,'Tag','legend'),'Location','SouthWest'); grid
+% % % ratio_ref_plots
+% % [f_hist,f_ev,f_sc,f_smooth]=ratio_ref_plots(Cal,ratio_ref,'plot_smooth',0);
