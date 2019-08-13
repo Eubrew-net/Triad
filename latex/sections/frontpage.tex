@@ -1,0 +1,58 @@
+%This file can be compiled by as a standalone document 
+%the preamble will be imported from the main file
+%%
+\documentclass[../main.tex]{subfiles} 
+%../main.tex is the path to the main file
+
+\begin{document} 
+%Everything below this point will appear in the main document
+\thispagestyle{empty} 
+\pagenumbering{roman} 
+\setcounter{page}{0}
+\definecolor{DimGrey}{rgb}{0.41, 0.41, 0.41}
+\begin{center}
+
+\textblockorigin{0cm}{0cm}
+
+%\begin{textblock*}{125mm}(14mm,30mm)
+\begin{table}[h!]
+  %\resizebox{1.4\textwidth}{!}
+  \begin{tabular}{  l c  r }
+    \includegraphics[scale=.20]{../images/AEMET1.pdf}  &
+    \includegraphics[scale=.40]{../images/GAW1.pdf}       &  
+    \includegraphics[scale=.31]{../images/RBCCE.png}   
+    \end{tabular}
+    \end{table}
+%\end{textblock*}
+
+
+\begin{textblock*}{180mm}(21mm,120mm)
+\begin{table}[h!] 
+  \begin{tabular} {rl}  
+    & \sffamily{\normalsize{\textbf{REGIONAL BREWER}}} \\
+    & \sffamily{\normalsize{\textbf{CALIBRATION CENTER EUROPE}}} \\
+    & \sffamily{\normalsize{\textbf{RBCCE}}} \\
+    Alberto Redondas Marrero & \\
+     %\\ \textbf{\ Calibration Report}  &\\
+    & \\
+    \normalsize{\textbf{IZA\~NA ATMOSPHERIC RESEARCH CENTER}} & %\campaign
+\end{tabular}
+\end{table}
+\end{textblock*}
+
+\begin{textblock*}{180mm}(24mm,240mm)
+\begin{table}[h!]
+  \begin{tabular}{rl}
+    & \color{DimGrey}{C/ La Marina 20} \\
+    & \color{DimGrey}{38071 Santa Cruz de Tenerife, Spain} \\
+    & \color{DimGrey}{Tel: +34922151718 / Fax: +3492274475} \\
+    & \\
+    \color{DimGrey}{IZA\~NA ATMOSPHERIC RESEARCH CENTER} & \color{DimGrey}{www.rbcc.org}
+  \end{tabular}
+\end{table}
+\end{textblock*}
+
+\end{center}
+
+\null\newpage
+\end{document}
