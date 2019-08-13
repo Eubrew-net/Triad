@@ -1,0 +1,48 @@
+\documentclass{book} %Any other document class can be used
+\usepackage[utf8]{inputenc}
+
+\usepackage{graphicx} %package to use images in the document
+
+%paths to the same images folder relative to the root and the "sections" folders.
+\graphicspath{{images/}{../images/}} 
+
+\usepackage{subfiles}
+\usepackage{rotating}
+%
+\usepackage[absolute]{textpos}
+\setlength{\parskip}{1.5mm}
+\usepackage[dvipsnames]{xcolor} 
+\usepackage[]{color} 
+
+
+ 
+
+
+
+
+\title{Insert Title Here}
+\author{Author: ShareLaTeX Team}
+\date{\today}
+
+\begin{document}
+
+\frontmatter
+%\section{portada}
+    \subfile{sections/frontpage} %path to tex file
+%\maketitle
+
+\mainmatter
+\chapter{First chapter}
+
+  
+
+
+    \section{Introduction}
+    \subfile{sections/introduction} %path to tex file
+
+
+    \section{Instrumental \#157}
+    \subfile{sections/instrumental_157.tex} %path to tex file
+
+
+\end{document}

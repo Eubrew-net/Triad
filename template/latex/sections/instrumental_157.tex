@@ -1,0 +1,58 @@
+%This file can be compiled by as a standalone document 
+%the preamble will be imported from the main file
+%%
+\documentclass[../main.tex]{subfiles} 
+%../main.tex is the path to the main file
+
+\begin{document} 
+%Everything below this point will appear in the main document
+
+\section{Brewer \#157.}
+
+\subsection{Brewer \#157: introduction AVG report}
+
+Standard Lamp values obtained from AVG file are shown in the Figure 1. The vertical lines defined events which could affect to the calibration, while the horizontal ones represent the R6 reference values for the operative and alternative configurations, respectively. The large difference between the experimental values and the reference can be explained if it is taking into account that the ICF in the brewer (computer) does not correspond with the operative ICF. In any case, the R6 values from the AVG file suggests that the B\#157 does not suffer any change in its configuration, see Table 1. Only, a jump (7 units) in the R6 is observed in October 2016 but after this, the SL presented its behaviour more stable. This jump is associated with a change in the intensity of the lamp.
+ 
+ \begin{sidewaysfigure}[h]
+\includegraphics[width=\textwidth]{B_157_SLAVG_R6.pdf}
+\label{fig:SL_events}
+\caption{SL record and events analyzed}
+\end{sidewaysfigure}
+
+ 
+ \begin{sidewaystable}[h]
+
+\IfFileExists{../tables/table_avg_157.tex}  % hacer una macro con esto
+        {\input{../tables/table_avg_157.tex}}
+        {\input{./tables/table_avg_157.tex}}
+ 
+\end{sidewaystable}
+ 
+\subsection{Brewer \#157: temperature dependence} 
+Due to the ICF introduced in the brewer is not the current ICF, the experimental R6 values must be calculated from raw counts. This also permits studying the temperature dependence of the brewer. As it is shown in the Figure 2, the current TC are not good (more 5 units/10ºC) and, hence, a new set the TC has been calculated (alternative configuration).  The new set reduce significantly this dependence.
+
+\subsection{Brewer \#157: Dead Time} 
+On the other hand, as it is shown in the figure 3, the Dead Time presents a mean value stable and closed to the operative value (26ns). Although, from October 2016, the DT values are noisy with large deviation between them.
+
+
+\begin{figure}[bh]
+
+\includegraphics[width=\textwidth]{B_157_DTAVG.pdf}
+\label{fig:DT_comp}
+\caption{DT Record durig reporting period}
+\end{figure}
+ 
+ 
+\subsection{Brewer \#157: Filter} 
+
+No filter dependence.
+ \begin{table}[h]
+
+\IfFileExists{../tables/table_fi_157.tex}  % hacer una macro con esto
+        {\input{../tables/table_fi_157.tex}}
+       {\input{./tables/table_fi_157.tex}}
+% \input{../tables/table_fi_157.tex}
+\end{table}
+
+
+\end{document}
