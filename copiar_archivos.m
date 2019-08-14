@@ -4,7 +4,7 @@
 % Este programa solo actualiza el año actual. Si se quiere actualizar años
 % previos, la variable Year debe ser modificada con el año deseado 
 % Year=2011, por ejemplo
-% Sergio Leon
+% Sergio "El Leon"
 
 % Averiguamos el año.
 a=datevec(now)
@@ -14,12 +14,12 @@ year=num2str(Year)
 
 %Brewer#157
 %Bfile
-origen=strcat('C:\CODE\iberonesia\RBCC_E\',year,'\bdata157\B*.157')
+origen=strcat('C:\CODE\rbcce.aemet.es\iberonesia\RBCC_E\',year,'\bdata157\B*.157')
 destino=strcat('C:\Brewer_Processing_Software\data\br#157\data\',year)
 copyfile(origen,destino)
 
 %UV file
-origen=strcat('C:\CODE\iberonesia\RBCC_E\',year,'\bdata157\UV\UV*.157')
+origen=strcat('C:\CODE\rbcce.aemet.es\iberonesia\RBCC_E\',year,'\bdata157\UV\UV*.157')
 destino=strcat('C:\Brewer_Processing_Software\data\br#157\data\',year)
 copyfile(origen,destino)
 %La instrucciones anteriores copian el arcchivo UVOAVG, lo borramos de la
@@ -29,12 +29,12 @@ delete(del)
 
 %Brewer#183
 %Bfile
-origen=strcat('C:\CODE\iberonesia\RBCC_E\',year,'\bdata183\B*.183')
+origen=strcat('C:\CODE\rbcce.aemet.es\iberonesia\RBCC_E\',year,'\bdata183\B*.183')
 destino=strcat('C:\Brewer_Processing_Software\data\br#183\data\',year)
 copyfile(origen,destino)
 
 %UV file
-origen=strcat('C:\CODE\iberonesia\RBCC_E\',year,'\bdata183\UV\UV*.183')
+origen=strcat('C:\CODE\rbcce.aemet.es\iberonesia\RBCC_E\',year,'\bdata183\UV\UV*.183')
 destino=strcat('C:\Brewer_Processing_Software\data\br#183\data\',year)
 copyfile(origen,destino)
 %La instrucciones anteriores copian el arcchivo UVOAVG, lo borramos de la
@@ -44,12 +44,12 @@ delete(del)
 
 %Brewer#185
 %Bfile
-origen=strcat('C:\CODE\iberonesia\RBCC_E\',year,'\bdata185\B*.185')
+origen=strcat('C:\CODE\rbcce.aemet.es\iberonesia\RBCC_E\',year,'\bdata185\B*.185')
 destino=strcat('C:\Brewer_Processing_Software\data\br#185\data\',year)
 copyfile(origen,destino)
 
 %UV file
-origen=strcat('C:\CODE\iberonesia\RBCC_E\',year,'\bdata185\UV\UV*.185')
+origen=strcat('C:\CODE\rbcce.aemet.es\iberonesia\RBCC_E\',year,'\bdata185\UV\UV*.185')
 destino=strcat('C:\Brewer_Processing_Software\data\br#185\data\',year)
 copyfile(origen,destino)
 %La instrucciones anteriores copian el arcchivo UVOAVG, lo borramos de la
