@@ -1,4 +1,5 @@
-%read_config_;
+path_root='/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad/ozone/';%Langley_Brw157_2019.txt'	
+read_config_;
 
 lgl=cell(3,1);
 op=lgl;
@@ -12,7 +13,8 @@ for i=1:3
     
     for ano=2015:2019
         j=ano-2014;
-        s1_=(strrep( strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/Langley/ozone/Langley_Brw157_2019.txt','2019',num2str(ano)),'157',num2str(brewer(i))))
+        s1_=(strrep( strrep(fullfile(path_root,'Langley_Brw157_2019.txt'),...
+                           '2019',num2str(ano)),'157',num2str(brewer(i))))
         if exist(s1_)
             s=load(s1_);
             lgl{i}=[lgl{i};s];
@@ -29,7 +31,7 @@ for i=1:3
     data=[round(data_tab_brw.m(:,2)) round(data_tab_brw.std(:,2)./sqrt(data_tab_brw.N(:,2)),1) ...
       round(data_tab_brw.m(:,4)) round(data_tab_brw.std(:,4)./sqrt(data_tab_brw.N(:,2)),1) data_tab_brw.N(:,2)];
     lgl_ev{i}=array2table(data,'VariableNames',{'ETC1','err1','ETC2','err2','N'},'RowNames',str2name(data_tab_brw.evnts));
-
+    
     
     
     figure(i)
@@ -45,6 +47,7 @@ for i=1:3
     datetick('keepticks')
     
 end
+
 
 % data_tab_brw=meanperiods(lgl_o3{i}, events{i}); 
 % data=[round(data_tab_brw.m(:,2)) round(data_tab_brw.std(:,2)./sqrt(data_tab_brw.N(:,2)),1) ...

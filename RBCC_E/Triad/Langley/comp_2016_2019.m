@@ -1,3 +1,4 @@
+path_root='/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad'
 %read_config_;
 
 ds_o=cell(3,1);
@@ -11,17 +12,23 @@ for i=1:3
     ds_a{i}=[];
     for ano=2015:2019
         j=ano-2014;
-        s1_=(strrep( strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/Langley/summary_Brw157_2019.txt','2019',num2str(ano)),'157',num2str(brewer(i))))
-        s2_=(strrep( strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/Langley/summary_old_Brw157_2019.txt','2019',num2str(ano)),'157',num2str(brewer(i))))
+        s1_=(strrep( strrep(fullfile(path_root,'summary_Brw157_2019.txt'),...
+            '2019',num2str(ano)),'157',num2str(brewer(i))))
+        s2_=(strrep( strrep(fullfile(path_root,'summary_old_Brw157_2019.txt'),...
+            '2019',num2str(ano)),'157',num2str(brewer(i))));
        
         if exist(s1_)
             s=load(s1_);
             ds_o{i}=[ds_o{i};s(:,1:15)];
-        end
+        else
+           warning([s1_ ,'not found'])
+        end    
         
         if exist(s2_)
             s=load(s2_);
             ds_a{i}=[ds_a{i};s(:,1:15)];
+        else
+         warning([s2_ ,'not found'])
         end
     end
     
@@ -84,3 +91,4 @@ plot(ratio(:,1),x,'.'); hold all
 %plot(ratio(:,1),x2,'-'); hold all
 plot(ratio(:,1),x3,':'); hold all
 grid;
+datetick('x',12)
