@@ -26,7 +26,7 @@ for ano=2016:2019
      sl{i}.tabla=[sl{i}.tabla;s.tabla_tc.data]
      %sl{i}.data=[sl{i}.data;s.tabla_tc.data];
      sl_s{i}=[sl_s{i},s.tabla_tc.sl];
-     sl_r{i}.data=[sl_s{i},s.tabla_tc.sl_r];
+     sl_r{i}=[sl_s{i},s.tabla_tc.sl_r];
      sl{i}.events=[sl{i}.events,s.tabla_tc.events];
      
      s1_=(strrep( strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/Langley/summary_old_Brw157_2019.txt','2019',num2str(ano)),'157',num2str(brewer(i))))
@@ -34,8 +34,8 @@ for ano=2016:2019
  
      ds=load(s1_);
      ds_r=load(s2_);
-     dsum_r{i}=[dsum_r{i};ds_r];
-     dsum{i}=[dsum{i};ds];
+     dsum_r{i}=[dsum_r{i};ds_r(:,1:15)]; % some summaries include config
+     dsum{i}=[dsum{i};ds(:,1:15)];
      
     
    end
@@ -51,26 +51,37 @@ end
    t_temperature=t_temperature(:,[end,1:end-1])
    writetable(t_temperature,strrep('temp_157.xls','157',num2str(brewer(i))),'WriteRowNames',true)
    
-   %%
-   hold off;figure(i*4+1);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[1,end]),'.'), end; grid; title(num2str(brewer(i)));
-   axis tight; datetick('keeplimits')
-   vline_v(sl{i}.tabla(:,1),'-',sl{i}.events)
-   figure(i*4+2);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[2,end]),'.'), end; grid; title(num2str(brewer(i)))
+   %% temperature analysis periods
    
-   figure(i*4+3);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[1,end]),'.'), end; grid; title(num2str(brewer(i)))
-    axis tight; datetick('keeplimits')
-   vline_v(sl{i}.tabla(:,1),'-',sl{i}.events)
-  
-   figure(i*4+2);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[2,end]),'o'), end; grid; title(num2str(brewer(i)))
-  
-   %%
-   figure(i*4+4)
+%    hold off;figure(i*4+1);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[1,end]),'.'), end; grid; title(num2str(brewer(i)));
+%    axis tight; datetick('keeplimits')
+%    vline_v(sl{i}.tabla(:,1),'-',sl{i}.events)
+%    
+
+   figure(i*3+1)
    plot(dsum{i}(:,1),dsum{i}(:,end),'r-',dsum{i}(:,1),dsum{i}(:,end-1),'k-')
    hold on
-   plot(dsum{i}(:,1),dsum{i}(:,end),'m-',dsum_r{i}(:,1),dsum_r{i}(:,end-1),'b.')
+   plot(dsum_r{i}(:,1),dsum_r{i}(:,end),'m-',dsum_r{i}(:,1),dsum_r{i}(:,end-1),'b-')
    vline_v(events{i}.dates,'-',events{i}.labels)
    legend({'R6 op','op_ref','R6 chk','chk_ref'})
-   
+   grid; title(num2str(brewer(i)))
+   datetick('x',12,'keepticks','keeplimits')
+   % operative vs temp
+   figure(i*3+2);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[2,end]),'.'), end; grid; title(num2str(brewer(i)))
+   %  alternative vs temp
+   figure(i*3+3);for j=1:length(sl_r{i}), hold all, ploty(sl_r{i}{j}(:,[2,end]),'.'), end; grid; title(num2str(brewer(i)))
+
+%    figure(i*4+3);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[1,end]),'.'), end; grid; title(num2str(brewer(i)))
+%     axis tight; datetick('keeplimits')
+%    vline_v(sl{i}.tabla(:,1),'-',sl{i}.events)
+%
+%    figure(i*4+4)
+%    plot(dsum{i}(:,1),dsum{i}(:,end),'r-',dsum{i}(:,1),dsum{i}(:,end-1),'k-')
+%    hold on
+%    plot(dsum_r{i}(:,1),dsum_r{i}(:,end),'m-',dsum_r{i}(:,1),dsum_r{i}(:,end-1),'b.')
+%    vline_v(events{i}.dates,'-',events{i}.labels)
+%    legend({'R6 op','op_ref','R6 chk','chk_ref'})
+%    grid; title(num2str(brewer(i)))
 end
 
 %% load configuration
@@ -78,9 +89,7 @@ end
 %load alt_cfg_16_19
 %load op_cfg_16_19
 %events{i}=op_cfg{1}.Properties.RowNames;
-
-
 %read_config_
-load('events_16_19.mat')
+%load('events_16_19.mat')
 
 %events{i}=op_cfg{1}.Properties.RowNames;
