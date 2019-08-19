@@ -3,8 +3,8 @@ dsum=cell(3,1);
 dsum_r=cell(3,1);
 brewer=[157,183,185]
 
-%read_config_
-load('events_16_19.mat')
+read_config_
+%load('events_16_19.mat')
 
 
 
@@ -51,6 +51,17 @@ end
    t_temperature=t_temperature(:,[end,1:end-1])
    writetable(t_temperature,strrep('temp_157.xls','157',num2str(brewer(i))),'WriteRowNames',true)
    
+    sl_o_brw=meanperiods(dsum{i}, events{i}); 
+    sl_a_brw=meanperiods(dsum_r{i}, events{i}); 
+    data=[round(sl_o_brw.m(:,end-1)) round(sl_o_brw.std(:,end-1),2) ...
+      round(sl_a_brw.m(:,end-1)) round(sl_o_brw.std(:,end-1)./sqrt(sl_a_brw.N(:,end-1)),1) sl_a_brw.N(:,end-1)];
+    lgl_ev{i}=array2table(data,'VariableNames',{'ETC1','err1','ETC2','err2','N'},'RowNames',str2name(data_tab_brw.evnts));
+    
+
+   
+   
+   
+   
    %% temperature analysis periods
    
 %    hold off;figure(i*4+1);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[1,end]),'.'), end; grid; title(num2str(brewer(i)));
@@ -59,13 +70,22 @@ end
 %    
 
    figure(i*3+1)
-   plot(dsum{i}(:,1),dsum{i}(:,end),'r-',dsum{i}(:,1),dsum{i}(:,end-1),'k-')
+   h1=plot(dsum{i}(:,1),dsum{i}(:,end),'r+',dsum{i}(:,1),dsum{i}(:,end-1),'k-')
    hold on
-   plot(dsum_r{i}(:,1),dsum_r{i}(:,end),'m-',dsum_r{i}(:,1),dsum_r{i}(:,end-1),'b-')
+   h2=plot(dsum_r{i}(:,1),dsum_r{i}(:,end),'mo',dsum_r{i}(:,1),dsum_r{i}(:,end-1),'b-')
    vline_v(events{i}.dates,'-',events{i}.labels)
-   legend({'R6 op','op_ref','R6 chk','chk_ref'})
-   grid; title(num2str(brewer(i)))
+   legend([h1;h2],{'R6 op','op_ref','R6 chk','chk_ref'})
+   set(h1(2),'LineWidth',2)
+   set(h2(2),'LineWidth',2)
+   
+   grid;
+   title(num2str(brewer(i)))
    datetick('x',12,'keepticks','keeplimits')
+   xlim([datenum(2015,12,1),now])
+   set(gca,'LooseInset',get(gca,'TightInset'))
+    
+   
+   
    % operative vs temp
    figure(i*3+2);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[2,end]),'.'), end; grid; title(num2str(brewer(i)))
    %  alternative vs temp
