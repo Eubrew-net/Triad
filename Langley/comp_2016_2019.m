@@ -1,5 +1,7 @@
-path_root='/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad'
-%read_config_;
+if ismac
+ path_root='/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad'
+end
+ %read_config_;
 
 ds_o=cell(3,1);
 ds_a=ds_o;
