@@ -36,61 +36,52 @@ for i=1:3
     
     %%Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref R6_calc
     
-    
-%     % unimos AM/PM
-%     lgl_o3{i}=sortrows([[lgl{i}(:,1)+0.25,lgl{i}(:,2:2:end)];[lgl{i}(:,1)+0.75,lgl{i}(:,3:2:end)]],1)
-%     op{i}=rows2vars(op_cfg{i});
-%     alt{i}=rows2vars(alt_cfg{i});
-%     
-%     %% por eventos
-%     data_tab_brw=meanperiods(lgl_o3{i}, events{i}); 
-%     data=[round(data_tab_brw.m(:,2)) round(data_tab_brw.std(:,2)./sqrt(data_tab_brw.N(:,2)),1) ...
-%       round(data_tab_brw.m(:,4)) round(data_tab_brw.std(:,4)./sqrt(data_tab_brw.N(:,2)),1) data_tab_brw.N(:,2)];
-%     lgl_ev{i}=array2table(data,'VariableNames',{'ETC1','err1','ETC2','err2','N'},'RowNames',str2name(data_tab_brw.evnts));
-
-    
-    
-%     figure(i)
-%     
-%     mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,2),60,1)
-%     hold on
-%     [xx,yy]=stairs(op{i}.UsageDate,[op{i}.ETCOnO3Ratio,alt{i}.ETCOnO3Ratio]);
-%     plot([xx;[now,now]],[yy;yy(end,:)], '-','LineWidth',5);
-%     %stairs(alt{i}.UsageDate,alt{i}.ETCOnO3Ratio,'k-','LineWidth',5)
-%     vline_v(events{i}.dates,' ',events{i}.labels)
-%     title(num2str(brewer(i)));
-%     grid on;
-%     datetick('keepticks')
-    
+ ds{i,1}=ds_o{i};
+ ds{i,2}=ds_a{i};
+     
 end
 
+%%
+for j=1:2
+
+    
 TSYNC=10; % (min)
-ref1=fix(ds_o{1}(:,1)*24*60/TSYNC)/24/60*TSYNC; 
-ref2=fix(ds_o{2}(:,1)*24*60/TSYNC)/24/60*TSYNC; 
-ref3=fix(ds_o{3}(:,1)*24*60/TSYNC)/24/60*TSYNC;
-s=scan_join([ref1,ds_o{1}],[ref2,ds_o{2}]);
-s=scan_join(s,[ref3,ds_o{3}]);
-%%Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref R6_calc
+ref1=fix(ds{1,j}(:,1)*24*60/TSYNC)/24/60*TSYNC; 
+ref2=fix(ds{2,j}(:,1)*24*60/TSYNC)/24/60*TSYNC; 
+ref3=fix(ds{3,j}(:,1)*24*60/TSYNC)/24/60*TSYNC;
+s=scan_join([ref1,ds{1,j}],[ref2,ds{2,j}]);
+s=scan_join(s,[ref3,ds{3,j}]);
+label{1}='Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref R6_calc';
+% s 1 date
+%        2:16  157 'Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref R6_calc'
+%       17:31  183
+%       32:45  185
+
+% datos simultaneos
 jsim=all(~isnan(s(:,7:15:end)),2) ; 
 ref=median(s(jsim,7:15:end),2);
 sim=s(jsim,:);
+
 % medidas que difieren en menos de 1º
 %histogram(sim(:,3:15:end)-mean(sim(:,3:15:end),2))
 jsim2=all(abs(sim(:,3:15:end)-mean(sim(:,3:15:end),2))<1.0,2);
-ref=median(sim(jsim2,7:15:end),2);
+ref=median(sim(jsim2,7:15:end),2);  % reference 1st configuration  (O3_1)
 
-ratio=[sim(jsim2,1),100*(sim(jsim2,7:15:end)-ref)./ref];
-ratio2=[sim(jsim2,1),100*(sim(jsim2,11:15:end)-ref)./ref];
-ratio3=[sim(jsim2,1),100*(sim(jsim2,13:15:end)-ref)./ref];
+ratio1=[sim(jsim2,1),100*(sim(jsim2,7:15:end)-ref)./ref];    % 1st configuration
+ratio2=[sim(jsim2,1),100*(sim(jsim2,11:15:end)-ref)./ref];   % 1st configuraiton + SL correction
+ratio3=[sim(jsim2,1),100*(sim(jsim2,13:15:end)-ref)./ref];   % 2nd  configuration 
 
-m=[sim(jsim2,1),sim(jsim2,4:15:end)];
+m=[sim(jsim2,1),sim(jsim2,4:15:end)]; % airmas
 
-x=smoothdata(ratio(:,2:end),'gaussian',15,'SamplePoints',ratio(:,1));
-x2=smoothdata(ratio2(:,2:end),'gaussian',15,'SamplePoints',ratio(:,1));
-x3=smoothdata(ratio3(:,2:end),'gaussian',15,'SamplePoints',ratio(:,1));
+x1=smoothdata(ratio1(:,2:end),'gaussian',15,'SamplePoints',ratio1(:,1));
+x2=smoothdata(ratio2(:,2:end),'gaussian',15,'SamplePoints',ratio2(:,1));
+%x3=smoothdata(ratio3(:,2:end),'gaussian',15,'SamplePoints',ratio3(:,1));
 figure
-plot(ratio(:,1),x,'.'); hold all
-%plot(ratio(:,1),x2,'-'); hold all
+plot(ratio(:,1),x1,'.'); hold all
+plot(ratio(:,1),x2,'-'); hold all
 plot(ratio(:,1),x3,':'); hold all
 grid;
-datetick('x',12)
+datetick('x',12);
+title(['Configuracion',num2str(j)])
+set(gca,'Ylim',[-2,2]);
+end
