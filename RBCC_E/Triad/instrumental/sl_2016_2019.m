@@ -53,12 +53,12 @@ end
    
     sl_o_brw=meanperiods(dsum{i}, events{i}); 
     sl_a_brw=meanperiods(dsum_r{i}, events{i}); 
-    data=[round(sl_o_brw.m(:,end-1)) round(sl_o_brw.std(:,end-1),2) ...
-      round(sl_a_brw.m(:,end-1)) round(sl_o_brw.std(:,end-1)./sqrt(sl_a_brw.N(:,end-1)),1) sl_a_brw.N(:,end-1)];
-    lgl_ev{i}=array2table(data,'VariableNames',{'ETC1','err1','ETC2','err2','N'},'RowNames',str2name(data_tab_brw.evnts));
-    
+    data=[events{i}.dates round(sl_o_brw.m(:,end),1) round(sl_o_brw.std(:,end),2) ...
+      round(sl_a_brw.m(:,end),1)     round(sl_a_brw.std(:,end),2) (sl_a_brw.N(:,end))];
+    sl_ev{i}=array2table(data,'VariableNames',{'Date','SL','std','SL_r','std_r','N'},'RowNames',str2name(events{i}.labels));
+    sl_ev{i}.Fecha=datetime(datestr(sl_ev{i}.Date))
 
-   
+   writetable(sl_ev{i},strrep('sl_2016_2019_157.xls','157',num2str(brewer(i))),'WriteRowNames',true)
    
    
    
