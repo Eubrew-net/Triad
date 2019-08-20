@@ -21,14 +21,14 @@ for i=1:3
        
         if exist(s1_)
             s=load(s1_);
-            ds_o{i}=[ds_o{i};s(:,1:15)];
+            ds_a{i}=[ds_o{i};s(:,1:15)];
         else
            warning([s1_ ,'not found'])
         end    
         
         if exist(s2_)
             s=load(s2_);
-            ds_a{i}=[ds_a{i};s(:,1:15)];
+            ds_o{i}=[ds_a{i};s(:,1:15)];
         else
          warning([s2_ ,'not found'])
         end
@@ -65,17 +65,21 @@ sim=s(jsim,:);
 % medidas que difieren en menos de 1º
 %histogram(sim(:,3:15:end)-mean(sim(:,3:15:end),2))
 jsim2=all(abs(sim(:,3:15:end)-mean(sim(:,3:15:end),2))<1.0,2);
-ref=median(sim(jsim2,7:15:end),2);  % reference 1st configuration  (O3_1)
 
-ratio1=[sim(jsim2,1),100*(sim(jsim2,7:15:end)-ref)./ref];    % 1st configuration
-ratio2=[sim(jsim2,1),100*(sim(jsim2,11:15:end)-ref)./ref];   % 1st configuraiton + SL correction
-ratio3=[sim(jsim2,1),100*(sim(jsim2,13:15:end)-ref)./ref];   % 2nd  configuration 
+ref1=median(sim(jsim2,7:15:end),2);  % reference 1st configuration  (O3_1)
+ref2=median(sim(jsim2,11:15:end),2);  % reference 2st configuration  (O3_2)
+ref3=median(sim(jsim2,13:15:end),2);  % reference 1st configuration+SL  (O3_1_sl)
+
+ratio1=[sim(jsim2,1),100*(sim(jsim2,7:15:end)-ref1)./ref1];    % 1st configuration
+ratio2=[sim(jsim2,1),100*(sim(jsim2,11:15:end)-ref2)./ref2];   % 2nd  configurationn
+ratio3=[sim(jsim2,1),100*(sim(jsim2,13:15:end)-ref3)./ref3];   % 1st configuraiton + SL correction 
 
 m=[sim(jsim2,1),sim(jsim2,4:15:end)]; % airmas
 
 x1=smoothdata(ratio1(:,2:end),'gaussian',15,'SamplePoints',ratio1(:,1));
 x2=smoothdata(ratio2(:,2:end),'gaussian',15,'SamplePoints',ratio2(:,1));
-%x3=smoothdata(ratio3(:,2:end),'gaussian',15,'SamplePoints',ratio3(:,1));
+x3=smoothdata(ratio3(:,2:end),'gaussian',15,'SamplePoints',ratio3(:,1));
+
 figure
 plot(ratio(:,1),x1,'.'); hold all
 plot(ratio(:,1),x2,'-'); hold all
