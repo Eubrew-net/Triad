@@ -13,8 +13,12 @@ OP_config =Cal.brw_config_files{Cal.n_inst,1};
 ALT_config=Cal.brw_config_files{Cal.n_inst,2};
 
 Cal.file_latex = fullfile('..','latex');
+
 Cal.dir_figs   = fullfile(Cal.file_latex,filesep(),'figures');
 mkdir(Cal.dir_figs);
+
+Cal.dir_tables   = fullfile(Cal.file_latex,filesep(),'tables');
+mkdir(Cal.dir_tables);
 
 %% Configs: Operative
 [a b c]=fileparts(OP_config);
@@ -262,7 +266,7 @@ t.labels=[{'start','hv','SL chg'}];
 %  Hay que mirar si hay cambios en la intensidad de la lampara ->
 %  
  
-[tabla_tc,sl_raw_183]=report_temperature(Cal,OP_config,OP_config,'grp_custom',t,'reprocess',0);
+[tabla_tc,sl_raw_183]=report_temperature(Cal,OP_config,OP_config,'grp_custom',t,'reprocess',1);
 %[tabla_tc,sl_raw_183]=report_temperature(Cal,OP_config,ALT_config,'grp','events','reprocess',0)
 %% Global temperature
 sl=cat(1,tabla_tc.sl{:});
