@@ -5,7 +5,7 @@ brewer=[157,183,185]
 
 read_config_
 %load('events_16_19.mat')
-
+close all
 
 
 for i=1:3
