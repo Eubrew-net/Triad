@@ -1,7 +1,7 @@
 if ismac
  path_root='/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad'
 end
- %read_config_;
+read_config_;
 
 ds_o=cell(3,1);
 ds_a=ds_o;
@@ -81,9 +81,9 @@ x2=smoothdata(ratio2(:,2:end),'gaussian',15,'SamplePoints',ratio2(:,1));
 x3=smoothdata(ratio3(:,2:end),'gaussian',15,'SamplePoints',ratio3(:,1));
 
 figure
-plot(ratio(:,1),x1,'.'); hold all
-plot(ratio(:,1),x2,'-'); hold all
-plot(ratio(:,1),x3,':'); hold all
+plot(ratio1(:,1),x1,'.'); hold all
+plot(ratio2(:,1),x2,'-','LineWidth',2); hold all
+%plot(ratio2(:,1),x3,':'); hold all
 grid;
 datetick('x',12);
 title(['Configuracion',num2str(j)])
