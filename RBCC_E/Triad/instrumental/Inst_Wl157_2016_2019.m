@@ -1,9 +1,9 @@
 % options_pub=struct('outputDir',fullfile('..','html'),'showCode',true); 
-% close all; publish(fullfile(pwd,'Inst_2016_2019_Wl157.m'),options_pub);
+% close all; publish(fullfile(pwd,'Inst_Wl157_2016_2019.m'),options_pub);
 
 %% Brewer Evaluation
 clear all; 
-file_setup='calizo2019_setup'; 
+file_setup='calizo_setup'; 
 run(fullfile('..',file_setup));     % configuracion por defecto
 
 Cal.n_inst=find(Cal.brw==157); 
@@ -13,8 +13,14 @@ OP_config =Cal.brw_config_files{Cal.n_inst,1};
 ALT_config=Cal.brw_config_files{Cal.n_inst,2};
 
 Cal.file_latex = fullfile('..','latex');
+
+
 Cal.dir_figs   = fullfile(Cal.file_latex,filesep(),'figures');
 mkdir(Cal.dir_figs);
+
+Cal.dir_tables   = fullfile(Cal.file_latex,filesep(),'tables');
+mkdir(Cal.dir_tables);
+
 
 %% Configs: Operative
 [a b c]=fileparts(OP_config);
@@ -30,7 +36,7 @@ try
 catch exception
    fprintf('%s, brewer: %s\n',exception.message,Cal.brw_str{Cal.n_inst});
 end
-matrix2latex_config(events_cfg_op.data(2:end,:),fullfile(Cal.file_latex,['Op_config_',Cal.brw_str{Cal.n_inst},'.tex']),...
+matrix2latex_config(events_cfg_op.data(2:end,:),fullfile(Cal.dir_tables,['Op_config_',Cal.brw_str{Cal.n_inst},'.tex']),...
                     'rowlabels',events_cfg_op.legend(2:end),'columnlabels',cellstr(datestr(events_cfg_op.data(1,:),1))',...
                     'size','footnotesize');
                 
@@ -267,7 +273,7 @@ vline_v(t.dates,'r-',t.labels)
 %[tabla_tc,sl_raw_157]=report_temperature(Cal,OP_config,ALT_config,'grp','events','reprocess',0)
 %% Global temperature
 sl=cat(1,tabla_tc.sl{:});
-sl_r=cat(1,tabla_tc.sl_r{:})
+sl_r=cat(1,tabla_tc.sl_r{:});
 sl_m=grpstats(sl(:,[1,end]),{year(sl(:,1)),month(sl(:,1))});
 sl_t=grpstats(sl(:,[2,end]),{year(sl(:,1)),month(sl(:,1))});
 slr_m=grpstats(sl_r(:,[1,end]),{year(sl(:,1)),month(sl(:,1))});
@@ -651,6 +657,7 @@ mc=mean_smooth_abs(tabla_dsp.data(:,1),tabla_dsp.data(:,[17]),90,0);
 hold on
 m157=nanmean(tabla_dsp.data(:,[15,17]))
 s157=nanstd(tabla_dsp.data(:,[15,17]))
+
 
 plot(tabla_dsp.data(:,1),(mq(:,1)-m157(1))/0.001)
 hold on
