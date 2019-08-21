@@ -1,11 +1,14 @@
 
-path_root='D:\CODE\iberonesia\RBCC_E\Triad\2019\Triad'
+%path_root='D:\CODE\iberonesia\RBCC_E\Triad\2019\Triad'
 %path_root='D:\CODE\iberonesia\RBCC_E\2019\Triad\langley'
-if ismac
- path_root='/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad'
-end
+%if ismac
+% path_root='/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad'
+%end
 
 run('../instrumental/read_config_')
+
+% remove year from cal.path_root
+path_root=Cal.path_root(1:(end-5));
 
 confname=["Cong.Op." "Conf.Alt."];
  
@@ -19,10 +22,12 @@ for i=1:3
     ds_a{i}=[];
     for ano=2015:2019
         j=ano-2014;
-        s1_=(strrep( strrep(fullfile(path_root,'summary_Brw157_2019.txt'),...
-            '2019',num2str(ano)),'157',num2str(brewer(i))))
-        s2_=(strrep( strrep(fullfile(path_root,'summary_old_Brw157_2019.txt'),...
-            '2019',num2str(ano)),'157',num2str(brewer(i))));
+        %s1_=(strrep( strrep(fullfile(path_root,'summary_Brw157_2019.txt'),...
+        %    '2019',num2str(ano)),'157',num2str(brewer(i))))
+        s1_=fullfile(path_root,'Triad',num2str(ano),'Triad',['summary_Brw',num2str(brewer(i)),'_',num2str(ano),'.txt'])
+        %s2_=(strrep( strrep(fullfile(path_root,'summary_old_Brw157_2019.txt'),...
+        %    '2019',num2str(ano)),'157',num2str(brewer(i))));
+        s2_=fullfile(path_root,'Triad',num2str(ano),'Triad',['summary_old_Brw',num2str(brewer(i)),'_',num2str(ano),'.txt'])
        
         if exist(s1_)
             s=load(s1_);
@@ -50,25 +55,25 @@ ds_seg=ds;
 
 %% read blacklist
 
-blaclist=cell(1,length(brewer));
+blacklist=cell(1,length(brewer));
 % loop for each brewer
 for i=1:length(brewer)
     %read blackist file as txt
     try
-        fblackist=fullfile(path_root,'..','..','..','configs',['blacklist_',num2str(brewer(i)),'.txt']);
-        fid = fopen(fblackist);
+        fblacklist=fullfile(path_root,'configs',['blacklist_',num2str(brewer(i)),'.txt']);
+        fid = fopen(fblacklist);
         blacklist_txt = textscan(fid,'%s%s%s','delimiter',',');
         fclose(fid);
     catch
-        fprintf('File does not exist: %s\n', fblackist);
+        fprintf('File does not exist: %s\n', fblacklist);
         continue;  % Jump to next brewer
     end
     
     %load blacklist struct 
     for j=1:length(blacklist_txt{1})
-        blaclist{i}(j).date_ini=datenum(blacklist_txt{1}{j});
-        blaclist{i}(j).date_end=datenum(blacklist_txt{2}{j});
-        blaclist{i}(j).comment=strrep(blacklist_txt{3}{j},'"','');
+        blacklist{i}(j).date_ini=datenum(blacklist_txt{1}{j});
+        blacklist{i}(j).date_end=datenum(blacklist_txt{2}{j});
+        blacklist{i}(j).comment=strrep(blacklist_txt{3}{j},'"','');
     end
 
 end
@@ -79,9 +84,9 @@ end
 for i=1:length(brewer)
     %loop for op=1 and alt=2 conf.
     for j=1:2
-        %loop for each blaclist rule
-        for k=1:length(blaclist{i})
-            ds{i,j}=ds{i,j}(ds{i,j}(:,1) < blaclist{i}(k).date_ini | ds{i,j}(:,1) > blaclist{i}(k).date_end,:);
+        %loop for each blacklist rule
+        for k=1:length(blacklist{i})
+            ds{i,j}=ds{i,j}(ds{i,j}(:,1) <blacklist{i}(k).date_ini | ds{i,j}(:,1) > blacklist{i}(k).date_end,:);
         end
     end
 end
