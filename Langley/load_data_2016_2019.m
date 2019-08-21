@@ -49,9 +49,9 @@ Cal.n_ref=Cal.n_ref;
     sl{i}=ozone.sl;       % first calibration / bfiles
     sl_cr{i}=ozone.sl_cr; % recalc. with 2? configuration
  end
-save(Cal.file_save);
+save(Cal.file_save,'ozone_sum','config','ozone_ds','ozone_raw','ozone_raw0','sl','sl_cr','Cal','hg');
 %%
-load(Cal.file_save,'ozone_sum','config','ozone_ds','ozone_raw','ozone_raw0','sl','sl_cr')
+%load(Cal.file_save,'ozone_sum','config','ozone_ds','ozone_raw','ozone_raw0','sl','sl_cr')
 %%
 %% Configs
 for i=Cal.n_ref
@@ -170,7 +170,7 @@ for i=Cal.n_ref
 end
 t_sum=write_summary_cfg((1:3),20162019,summary_old,summary,SL_R,SL_B,A,ETC);
 save(Cal.file_save,'-APPEND','A','ETC','F_corr','SL_B','SL_R','SL_corr_flag','cfg',...
-                             'summary_old','summary_orig_old','summary','summary_orig');
+                             'summary_old','summary_orig_old','summary','summary_orig','t_sum');
 %% Outliers? Los detectamos
 ref=[];
 for ii=Cal.n_ref
