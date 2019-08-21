@@ -1,11 +1,16 @@
+
+path_root='D:\CODE\iberonesia\RBCC_E\Triad\2019\Triad'
+%path_root='D:\CODE\iberonesia\RBCC_E\2019\Triad\langley'
 if ismac
  path_root='/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad'
 end
-read_config_;
 
+run('../instrumental/read_config_')
+
+confname=["Cong.Op." "Conf.Alt."];
+ 
 ds_o=cell(3,1);
 ds_a=ds_o;
-
 
 brewer=[157,183,185];
 ano0=2014;
@@ -21,14 +26,14 @@ for i=1:3
        
         if exist(s1_)
             s=load(s1_);
-            ds_a{i}=[ds_o{i};s(:,1:15)];
+            ds_a{i}=[ds_a{i};s(:,1:15)];
         else
            warning([s1_ ,'not found'])
         end    
         
         if exist(s2_)
             s=load(s2_);
-            ds_o{i}=[ds_a{i};s(:,1:15)];
+            ds_o{i}=[ds_o{i};s(:,1:15)];
         else
          warning([s2_ ,'not found'])
         end
@@ -39,6 +44,38 @@ for i=1:3
  ds{i,1}=ds_o{i};
  ds{i,2}=ds_a{i};
      
+end
+
+%% read blacklist
+
+blaclist=[];
+% loop for each brewer
+for i=1:length(brewer)
+    %read blackist file as txt
+    fid = fopen(fullfile(path_root,'..','..','..','configs',['blacklist_',num2str(brewer(i)),'.txt']));
+    blacklist_txt = textscan(fid,'%s%s%s','delimiter',',');
+    fclose(fid);
+    
+    %load blacklist struct 
+    for j=1:length(blacklist_txt{1})
+        blaclist{i}(j).date_ini=datenum(blacklist_txt{1}{j});
+        blaclist{i}(j).date_end=datenum(blacklist_txt{2}{j});
+        blaclist{i}(j).comment=strrep(blacklist_txt{3}{j},'"','');
+    end
+
+end
+
+%% Filtering data with the blacklist
+
+% loop for each brewer
+for i=1:length(brewer)
+    %loop for op=1 and alt=2 conf.
+    for j=1:2
+        %loop for each blaclist rule
+        for k=1:length(blaclist{i})
+            ds{i,j}=ds{i,j}(ds{i,j}(:,1) < blaclist{i}(k).date_ini | ds{i,j}(:,1) > blaclist{i}(k).date_end,:);
+        end
+    end
 end
 
 %%
@@ -86,6 +123,7 @@ plot(ratio2(:,1),x2,'-','LineWidth',2); hold all
 %plot(ratio2(:,1),x3,':'); hold all
 grid;
 datetick('x',12);
-title(['Configuracion',num2str(j)])
+%title(['Configuracion',num2str(j)])
+title(confname(j))
 set(gca,'Ylim',[-2,2]);
 end
