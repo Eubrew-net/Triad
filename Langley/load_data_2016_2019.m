@@ -28,28 +28,28 @@ end
 
 
 % READ Brewer Summaries
-% Cal.n_ref=Cal.n_ref;
-%  for i=1:Cal.n_brw
-%     ozone_raw{i}={};   hg{i}={};   ozone_sum{i}={};  ozone_raw0{i}={};
-%     config{i}={};      sl{i}={};   ozone_ds{i}={};   sl_cr{i}={};
-% 
-%     if i<=3
-%         [ozone,log_,missing_]=read_bdata(i,Cal);
-%     else
-%         [ozone,log_,missing_]=read_bdata(i,Cal,'/Users/aredondas/CODE/iberonesia/RBCC_E/2016/bdata');
-%     end
-%     % depuramos datos (ver incidencias en config. matrix)
-%     ozone=dep_data(Cal.incidences_text{i},ozone);
-% 
-%     ozone_sum{i}=ozone.ozone_sum;
-%     config{i}=ozone.config;
-%     ozone_ds{i}=ozone.ozone_ds;
-%     ozone_raw{i}=ozone.raw;
-%     ozone_raw0{i}=ozone.raw0;
-%     sl{i}=ozone.sl;       % first calibration / bfiles
-%     sl_cr{i}=ozone.sl_cr; % recalc. with 2? configuration
-%  end
-% save(Cal.file_save);
+Cal.n_ref=Cal.n_ref;
+ for i=1:Cal.n_brw
+    ozone_raw{i}={};   hg{i}={};   ozone_sum{i}={};  ozone_raw0{i}={};
+    config{i}={};      sl{i}={};   ozone_ds{i}={};   sl_cr{i}={};
+
+    if i<=3
+        [ozone,log_,missing_]=read_bdata(i,Cal);
+    else
+        [ozone,log_,missing_]=read_bdata(i,Cal,'/Users/aredondas/CODE/iberonesia/RBCC_E/2016/bdata');
+    end
+    % depuramos datos (ver incidencias en config. matrix)
+    ozone=dep_data(Cal.incidences_text{i},ozone);
+
+    ozone_sum{i}=ozone.ozone_sum;
+    config{i}=ozone.config;
+    ozone_ds{i}=ozone.ozone_ds;
+    ozone_raw{i}=ozone.raw;
+    ozone_raw0{i}=ozone.raw0;
+    sl{i}=ozone.sl;       % first calibration / bfiles
+    sl_cr{i}=ozone.sl_cr; % recalc. with 2? configuration
+ end
+save(Cal.file_save);
 %%
 load(Cal.file_save,'ozone_sum','config','ozone_ds','ozone_raw','ozone_raw0','sl','sl_cr')
 %%
@@ -168,7 +168,7 @@ for i=Cal.n_ref
     % filter correction
     [summary_old{i} summary{i}]=filter_corr(summary_orig,summary_orig_old,i,A,F_corr{i});
 end
-write_summary(Cal.brw(1:3),20162019,summary_old,summary,SL_R,SL_B);
+t_sum=write_summary_cfg((1:3),20162019,summary_old,summary,SL_R,SL_B,A,ETC);
 save(Cal.file_save,'-APPEND','A','ETC','F_corr','SL_B','SL_R','SL_corr_flag','cfg',...
                              'summary_old','summary_orig_old','summary','summary_orig');
 %% Outliers? Los detectamos
