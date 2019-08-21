@@ -46,15 +46,23 @@ for i=1:3
      
 end
 
+ds_seg=ds;
+
 %% read blacklist
 
-blaclist=[];
+blaclist=cell(1,length(brewer));
 % loop for each brewer
 for i=1:length(brewer)
     %read blackist file as txt
-    fid = fopen(fullfile(path_root,'..','..','..','configs',['blacklist_',num2str(brewer(i)),'.txt']));
-    blacklist_txt = textscan(fid,'%s%s%s','delimiter',',');
-    fclose(fid);
+    try
+        fblackist=fullfile(path_root,'..','..','..','configs',['blacklist_',num2str(brewer(i)),'.txt']);
+        fid = fopen(fblackist);
+        blacklist_txt = textscan(fid,'%s%s%s','delimiter',',');
+        fclose(fid);
+    catch
+        fprintf('File does not exist: %s\n', fblackist);
+        continue;  % Jump to next brewer
+    end
     
     %load blacklist struct 
     for j=1:length(blacklist_txt{1})
