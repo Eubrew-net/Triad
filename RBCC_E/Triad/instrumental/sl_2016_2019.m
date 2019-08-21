@@ -53,13 +53,13 @@ end
    
     sl_o_brw=meanperiods(dsum{i}, events{i}); 
     sl_a_brw=meanperiods(dsum_r{i}, events{i}); 
-    data=[events{i}.dates round(sl_o_brw.m(:,end),1) round(sl_o_brw.std(:,end),2) ...
-      round(sl_a_brw.m(:,end),1)     round(sl_a_brw.std(:,end),2) (sl_a_brw.N(:,end))];
-    sl_ev{i}=array2table(data,'VariableNames',{'Date','SL','std','SL_r','std_r','N'},'RowNames',str2name(events{i}.labels));
-    sl_ev{i}.Fecha=datetime(datestr(sl_ev{i}.Date))
-
-   writetable(sl_ev{i},strrep('sl_2016_2019_157.xls','157',num2str(brewer(i))),'WriteRowNames',true)
-   
+    data=[events{i}.dates round(sl_o_brw.m(:,end),1) round(sl_o_brw.std(:,end),2)  op_cfg{i}{17,:}' ...
+      round(sl_a_brw.m(:,end),1)     round(sl_a_brw.std(:,end),2)  alt_cfg{i}{17,:}' (sl_a_brw.N(:,end))];
+    sl_ev{i}=array2table(data,'VariableNames',{'Date','SL','std','SL_op_ref','SL_r','std_r','SL_chk_ref','N'},'RowNames',varname(str2name(strrep(events{i}.labels,'"',''))));
+    sl_ev{i}.Fecha=datetime(datestr(sl_ev{i}.Date));
+    sl_ev{i}=timetable2table(table2timetable(sl_ev{i}));
+    writetable(sl_ev{i},strrep('sl_2016_2019_157.xls','157',num2str(brewer(i))),'WriteRowNames',true)
+    writetable(sl_ev{i},'sl_2016_2019.xls','Sheet',num2str(brewer(i)),'WriteRowNames',true)
    
    
    %% temperature analysis periods
@@ -70,13 +70,13 @@ end
 %    
 
    figure(i*3+1)
-   h1=plot(dsum{i}(:,1),dsum{i}(:,end),'r+',dsum{i}(:,1),dsum{i}(:,end-1),'k-')
+   h1=plot(dsum{i}(:,1),dsum{i}(:,end),'r+',dsum{i}(:,1),dsum{i}(:,end-1),'k-');
    hold on
-   h2=plot(dsum_r{i}(:,1),dsum_r{i}(:,end),'mo',dsum_r{i}(:,1),dsum_r{i}(:,end-1),'b-')
+   h2=plot(dsum_r{i}(:,1),dsum_r{i}(:,end),'mo',dsum_r{i}(:,1),dsum_r{i}(:,end-1),'b-');
    vline_v(events{i}.dates,'-',events{i}.labels)
    legend([h1;h2],{'R6 op','op_ref','R6 chk','chk_ref'})
-   set(h1(2),'LineWidth',2)
-   set(h2(2),'LineWidth',2)
+   set(h1(2),'LineWidth',2);
+   set(h2(2),'LineWidth',2);
    
    grid;
    title(num2str(brewer(i)))
@@ -87,9 +87,9 @@ end
    
    
    % operative vs temp
-   figure(i*3+2);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[2,end]),'.'), end; grid; title(num2str(brewer(i)))
+   figure(i*3+2);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[2,end]),'.'); end; grid; title(num2str(brewer(i)));
    %  alternative vs temp
-   figure(i*3+3);for j=1:length(sl_r{i}), hold all, ploty(sl_r{i}{j}(:,[2,end]),'.'), end; grid; title(num2str(brewer(i)))
+   figure(i*3+3);for j=1:length(sl_r{i}), hold all, ploty(sl_r{i}{j}(:,[2,end]),'.'); end; grid; title(num2str(brewer(i)));
 
 %    figure(i*4+3);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[1,end]),'.'), end; grid; title(num2str(brewer(i)))
 %     axis tight; datetick('keeplimits')
