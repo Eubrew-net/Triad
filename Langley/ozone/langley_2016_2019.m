@@ -6,8 +6,18 @@ read_config_;
 
 
 %% eventos finales
+% 157
+ev=cell(3,1);
+
 ev{1}.dates=events{1}.dates([1,17,20,23]);
 ev{1}.labels=[events{1}.labels([1,17,20,23])];
+ev{1}.op_ETC=[op_cfg{1}{8,[1,17,20,23]}];
+ev{1}.alt_ETC=[alt_cfg{1}{8,[1,17,20,23]}];
+% 183
+ev{2}.dates=events{2}.dates([1,9,13,15,16]);
+ev{2}.labels=[events{2}.labels([1,9,13,15,16])];
+ev{2}.op_ETC=[op_cfg{2}{8,[1,9,13,15,16]}];
+ev{2}.alt_ETC=[alt_cfg{2}{8,[1,9,13,15,16]}];
 
 lgl=cell(3,1);
 op=lgl;
@@ -38,17 +48,35 @@ for i=1:3
     
     %% por eventos
     data_tab_brw=meanperiods(lgl_o3{i}, events{i}); 
-    data=[round(data_tab_brw.m(:,2)) round(data_tab_brw.std(:,2)./sqrt(data_tab_brw.N(:,2)),1) ...
-      round(data_tab_brw.m(:,4)) round(data_tab_brw.std(:,4)./sqrt(data_tab_brw.N(:,2)),1) data_tab_brw.N(:,2)];
-    lgl_ev{i}=array2table(data,'VariableNames',{'ETC1','err1','ETC2','err2','N'},'RowNames',str2name(data_tab_brw.evnts));
+    data=[round(data_tab_brw.m(:,2)), round(data_tab_brw.std(:,2)./sqrt(data_tab_brw.N(:,2)),1), ...
+          op_cfg{i}{8,:}',...
+      round(data_tab_brw.m(:,4)), round(data_tab_brw.std(:,4)./sqrt(data_tab_brw.N(:,2)),1),...
+          alt_cfg{i}{8,:}', data_tab_brw.N(:,2)];
+    lgl_ev{i}=array2table(data,'VariableNames',{'ETC1','err1','ETC_op','ETC2','err2','ETC_alt','N'},'RowNames',str2name(data_tab_brw.evnts));
+    lgl_ev{i}.Date=events{i}.dates;
+       
+    %lgl_ev{i}.Date=datetime(datestr(events{i}.dates));
+    %lgl_ev{i}=timetable2table(table2timetable(lgl_ev{i}));
+    
+    %% eventos finales
+    if ~isempty(ev{i})
+       data_tab_brw=meanperiods(lgl_o3{i}, ev{i}); 
+       data=[round(data_tab_brw.m(:,2)), round(data_tab_brw.std(:,2)./sqrt(data_tab_brw.N(:,2)),1), ev{i}.op_ETC', ...
+       round(data_tab_brw.m(:,4)), round(data_tab_brw.std(:,4)./sqrt(data_tab_brw.N(:,2)),1), ev{i}.alt_ETC', data_tab_brw.N(:,2)];
+       lgl_ev_final{i}=array2table(data,'VariableNames',{'ETC1','err1','ETC_op','ETC2','err2','ETC_alt','N'},'RowNames',str2name(data_tab_brw.evnts));
+       %lgl_ev_final{i}.Date=str2num(datestr(ev{i}.dates,'yyyymmdd'))
+       lgl_ev_final{i}.Date=datetime(datestr(ev{i}.dates));
+       lgl_ev_final{i}=timetable2table(table2timetable(lgl_ev_final{i}));
+    end
     
     %% ejemplo para tablas latex
     input.data=lgl_ev{i};
     % Switch transposing/pivoting your table if needed:
-    input.transposeTable = 1;
+    input.transposeTable = 0;
     % Switch to generate a complete LaTex document or just a table:
     input.makeCompleteLatexDocument = 0;
-    cellwrite('langley_eventos_.tex',latexTable(input));
+    l=latexTable(input);
+    cellwrite(sprintf('langley_eventos_%03d.tex',brewer(i)),l);
     
     
     
