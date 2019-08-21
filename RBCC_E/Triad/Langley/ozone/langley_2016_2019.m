@@ -54,7 +54,7 @@ for i=1:3
     
     figure
     
-    mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,2),60,1)
+    mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,2),60,1);
     hold on
     [xx,yy]=stairs(op{i}.UsageDate,[op{i}.ETCOnO3Ratio,alt{i}.ETCOnO3Ratio]);
     h=plot([xx;[now,now]],[yy;yy(end,:)], '-','LineWidth',5);
@@ -72,7 +72,7 @@ for i=1:3
     
     figure
     
-    mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,4),60,1)
+    mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,4),60,1);
     hold on
     [xx,yy]=stairs(op{i}.UsageDate,[op{i}.ETCOnO3Ratio,alt{i}.ETCOnO3Ratio]);
     h=plot([xx;[now,now]],[yy;yy(end,:)], '-','LineWidth',5);
