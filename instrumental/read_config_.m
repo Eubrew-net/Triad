@@ -3,6 +3,8 @@
 file_setup='calizo_setup';
 run(fullfile('..',file_setup));     % configuracion por defecto
 op_cfg=cell(3,1);
+events_cfg_op=cell(3,1)
+events_cfg_chk=cell(3,1)
 chk_cfg=op_cfg;
 events=cell(3,1);
 
@@ -31,15 +33,15 @@ for i=Cal.n_ref
                  sprintf('config%d.cfg',Cal.brw(i)),strcat(b,c));
       end
       fprintf('\nBrewer %s: Operative Config.\n',Cal.brw_name{i});
-      events_cfg_op=getcfgs(Cal.Date.CALC_DAYS,OP_config);
-      op_cfg{i}=display_table(events_cfg_op.data(1:end,:),cellstr(datestr(events_cfg_op.data(1,:),1))',12,'.5g',events_cfg_op.legend(1:end));
+      events_cfg_op{i}=getcfgs(Cal.Date.CALC_DAYS,OP_config);
+      op_cfg{i}=display_table(events_cfg_op{i}.data(1:end,:),cellstr(datestr(events_cfg_op{i}.data(1,:),1))',12,'.5g',events_cfg_op{i}.legend(1:end));
       %Cal.n_inst=i;
       %events{i}=getevents(Cal,'grp','events');
     catch exception
       fprintf('%s, brewer: %s\n',exception.message,Cal.brw_str{i});
     end
-     matrix2latex_config(events_cfg_op.data(2:end,:),fullfile(Cal.dir_tables,['Op_config_',Cal.brw_str{i},'.tex']),...
-                     'rowlabels',str2var(events_cfg_op.legend(2:end)),'columnlabels',cellstr(datestr(events_cfg_op.data(1,:),1))',...
+     matrix2latex_config(events_cfg_op{i}.data(2:end,:),fullfile(Cal.dir_tables,['Op_config_',Cal.brw_str{i},'.tex']),...
+                     'rowlabels',str2var(events_cfg_op{i}.legend(2:end)),'columnlabels',cellstr(datestr(events_cfg_op{i}.data(1,:),1))',...
                      'size','footnotesize');
     
     
@@ -53,14 +55,14 @@ for i=Cal.n_ref
                            '(Expected: %s, Loading: %s)\n'),...
                   sprintf('config%d_a.cfg',Cal.brw(i)),strcat(b,c));
        end
-       events_cfg_chk=getcfgs(Cal.Date.CALC_DAYS,ALT_config);
+       events_cfg_chk{i}=getcfgs(Cal.Date.CALC_DAYS,ALT_config);
        fprintf('\nBrewer %s: Second Config.\n',Cal.brw_name{i});
        Cal.n_inst=i;
        events{i}=getevents(Cal,'grp','events');
-       alt_cfg{i}=display_table(events_cfg_chk.data(1:end,:),cellstr(datestr(events_cfg_chk.data(1,:),'mmmyy-dd'))',12,'.5g',events_cfg_chk.legend(1:end));
+       alt_cfg{i}=display_table(events_cfg_chk{i}.data(1:end,:),cellstr(datestr(events_cfg_chk{i}.data(1,:),'mmmyy-dd'))',12,'.5g',events_cfg_chk{i}.legend(1:end));
        
-            matrix2latex_config(events_cfg_chk.data(2:end,:),fullfile(Cal.dir_tables,['ALT_config_',Cal.brw_str{i},'.tex']),...
-                     'rowlabels',str2var(events_cfg_chk.legend(2:end)),'columnlabels',cellstr(datestr(events_cfg_chk.data(1,:),1))',...
+            matrix2latex_config(events_cfg_chk{i}.data(2:end,:),fullfile(Cal.dir_tables,['ALT_config_',Cal.brw_str{i},'.tex']),...
+                     'rowlabels',str2var(events_cfg_chk{i}.legend(2:end)),'columnlabels',cellstr(datestr(events_cfg_chk{i}.data(1,:),1))',...
                      'size','footnotesize');
        
      %%
