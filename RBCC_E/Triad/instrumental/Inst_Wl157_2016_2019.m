@@ -505,7 +505,7 @@ tabla_hs_157=display_table(tabla_HL.data(:,2:end)',tabla_HL.events,12,'.4f',tabl
 %% DSP's 
 close all; 
 Cal.Date.CALC_DAYS=datenum(2015,6,1):now;
-tabla_dsp=report_dispersion_new(Cal,'grp','events','fpath',fullfile(Cal.path_root,'..','DSP'),'process',0,...
+[tabla_dsp,dsp_quad,dsp_cubic]=report_dispersion_new(Cal,'grp','events','fpath',fullfile(Cal.path_root,'..','DSP'),'process',0,...
                                            'date_range',Cal.Date.CALC_DAYS);  
 
 Cal.Date.CALC_DAYS=datenum(2015,6,1):now;

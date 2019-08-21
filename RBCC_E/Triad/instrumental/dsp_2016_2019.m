@@ -1,5 +1,5 @@
 % collecting dsp information
-read_config_2
+read_config_
 brewer=Cal.brw
 
 % Tabla por eventos
@@ -31,6 +31,7 @@ dsp_cubic{i}=[];dsp_cuad{i}=[];
 dsp_ev{i}=[];dsp_table{i}=[];
 
 Cal.Date.CALC_DAYS=datenum(2015,6,1):now;
+Cal.n_inst=i
 %average for events
 tabla_dsp_ev{i}=report_dispersion_new(Cal,'grp','events','fpath',fullfile(Cal.path_root,'..','DSP'),'process',0,...
                                            'date_range',Cal.Date.CALC_DAYS);  
@@ -70,7 +71,7 @@ e{i}=nanstd(tabla_dsp{i}.data(:,[15,17]))./sqrt(n{i})
 h1=plot(tabla_dsp{i}.data(:,1),(mq{i}(:,1)-m{i}(1))/0.001)
 hold on
 h2=plot(tabla_dsp{i}.data(:,1),(mc{i}(:,1)-m{i}(2))/0.001)
-legend([h1,h2],{'cuadratic','cubic'})
+
 plot(tabla_dsp{i}.data(:,1),(tabla_dsp{i}.data(:,15)-m{i}(1))/0.001,'k+')
 hold on
 plot(tabla_dsp{i}.data(:,1),(tabla_dsp{i}.data(:,17)-m{i}(2))/0.001,'bx')
@@ -78,12 +79,12 @@ plot(tabla_dsp{i}.data(:,1),(tabla_dsp{i}.data(:,17)-m{i}(2))/0.001,'bx')
 datetick('x','mmm/yy','keepticks')
 grid on
 ylabel('Micromenter step')
-title({strrep('Brewer #157 Ozone Abs coeff diff vs mean','157',num2str(brewer(i))),sprintf('quad=%.4f cubic=%.4f',m185)})
+title({strrep('Brewer #157 Ozone Abs coeff diff vs mean','157',num2str(brewer(i))),sprintf('quad=%.4f cubic=%.4f',m{i})})
 box on
 set(gca,'YLim',[-2 2])
 vline_v(events{i}.dates,'k',events{i}.labels);
 hfill([-0.5,0.5],'grey')
-
+legend([h1,h2],{'cuadratic','cubic'})
 
 
 
