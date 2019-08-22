@@ -1,5 +1,5 @@
 if ismac
-   path_root='/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad/ozone/';%Langley_Brw157_2019.txt'	
+   path_root='/Users/aredondasm/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad/ozone/';%Langley_Brw157_2019.txt'	
 end
 
 read_config_;
@@ -26,6 +26,7 @@ lgl_ev=op;
 
 brewer=[157,183,185];
 ano0=2014;
+s=[];
 for i=1:3
     lgl{i}=[];
     
