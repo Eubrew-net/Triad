@@ -24,10 +24,10 @@ for i=1:3
         j=ano-2014;
         %s1_=(strrep( strrep(fullfile(path_root,'summary_Brw157_2019.txt'),...
         %    '2019',num2str(ano)),'157',num2str(brewer(i))))
-        s1_=fullfile(path_root,'Triad',num2str(ano),'Triad',['summary_Brw',num2str(brewer(i)),'_',num2str(ano),'.txt'])
+        s1_=fullfile(path_root,'Triad',num2str(ano),'Triad',['summary_Brw',num2str(brewer(i)),'_',num2str(ano),'.txt']);
         %s2_=(strrep( strrep(fullfile(path_root,'summary_old_Brw157_2019.txt'),...
         %    '2019',num2str(ano)),'157',num2str(brewer(i))));
-        s2_=fullfile(path_root,'Triad',num2str(ano),'Triad',['summary_old_Brw',num2str(brewer(i)),'_',num2str(ano),'.txt'])
+        s2_=fullfile(path_root,'Triad',num2str(ano),'Triad',['summary_old_Brw',num2str(brewer(i)),'_',num2str(ano),'.txt']);
        
         if exist(s1_)
             s=load(s1_);
@@ -42,59 +42,22 @@ for i=1:3
         else
          warning([s2_ ,'not found'])
         end
+        
+        fprintf('Año %d brewer %d diff(o1,a2)=%d diff(o1,a2)=%d\n',ano,brewer(i),sum((ds_o{i}(:,6)-ds_a{i}(:,10))~=0),sum((ds_o{i}(:,10)-ds_a{i}(:,6))~=0));
     end
     
     %%Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref R6_calc
     
- ds{i,1}=ds_o{i};
- ds{i,2}=ds_a{i};
-     
-end
-
-ds_seg=ds;
-
-%% read blacklist
-
-blacklist=cell(1,length(brewer));
-% loop for each brewer
-for i=1:length(brewer)
-    %read blackist file as txt
-    try
-        fblacklist=fullfile(path_root,'configs',['blacklist_',num2str(brewer(i)),'.txt']);
-        fid = fopen(fblacklist);
-        blacklist_txt = textscan(fid,'%s%s%s','delimiter',',');
-        fclose(fid);
-    catch
-        fprintf('File does not exist: %s\n', fblacklist);
-        continue;  % Jump to next brewer
-    end
+ fblacklist=fullfile(path_root,'configs',['blacklist_',num2str(brewer(i)),'.txt']);  
     
-    %load blacklist struct 
-    for j=1:length(blacklist_txt{1})
-        blacklist{i}(j).date_ini=datenum(blacklist_txt{1}{j});
-        blacklist{i}(j).date_end=datenum(blacklist_txt{2}{j});
-        blacklist{i}(j).comment=strrep(blacklist_txt{3}{j},'"','');
-    end
-
-end
-
-%% Filtering data with the blacklist
-
-% loop for each brewer
-for i=1:length(brewer)
-    %loop for op=1 and alt=2 conf.
-    for j=1:2
-        %loop for each blacklist rule
-        for k=1:length(blacklist{i})
-            ds{i,j}=ds{i,j}(ds{i,j}(:,1) <blacklist{i}(k).date_ini | ds{i,j}(:,1) > blacklist{i}(k).date_end,:);
-        end
-    end
+ ds{i,1}=blacklist_summary(fblacklist,ds_o{i});
+ ds{i,2}=blacklist_summary(fblacklist,ds_a{i});
+     
 end
 
 %%
 for j=1:2
-
-    
+ 
 TSYNC=10; % (min)
 ref1=fix(ds{1,j}(:,1)*24*60/TSYNC)/24/60*TSYNC; 
 ref2=fix(ds{2,j}(:,1)*24*60/TSYNC)/24/60*TSYNC; 
@@ -111,6 +74,12 @@ label{1}='Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref 
 jsim=all(~isnan(s(:,7:15:end)),2) ; 
 ref=median(s(jsim,7:15:end),2);
 sim=s(jsim,:);
+
+% prueba
+%mydata=sim(:,7:15:end)-mean(sim(:,7:15:end),2);
+%figure
+%plot(sim(:,1),mydata)
+%prueba
 
 % medidas que difieren en menos de 1º
 %histogram(sim(:,3:15:end)-mean(sim(:,3:15:end),2))
@@ -132,7 +101,7 @@ x3=smoothdata(ratio3(:,2:end),'gaussian',15,'SamplePoints',ratio3(:,1));
 
 figure
 plot(ratio1(:,1),x1,'.'); hold all
-plot(ratio2(:,1),x2,'-','LineWidth',2); hold all
+%plot(ratio2(:,1),x2,'-','LineWidth',2); hold all
 %plot(ratio2(:,1),x3,':'); hold all
 grid;
 datetick('x',12);
