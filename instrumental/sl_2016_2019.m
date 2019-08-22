@@ -49,7 +49,7 @@ catch
 end
    t_temperature.Date_str=datestr(t_temperature.date,'yyyy/mm/dd');
    t_temperature=t_temperature(:,[end,1:end-1])
-   writetable(t_temperature,strrep('temp_157.xls','157',num2str(brewer(i))),'WriteRowNames',true)
+   writetable(t_temperature,'IzoTriad_2016_2019.xls','Sheet',strrep('temp_157','157',num2str(brewer(i))),'WriteRowNames',true)
    
     sl_o_brw=meanperiods(dsum{i}, events{i}); 
     sl_a_brw=meanperiods(dsum_r{i}, events{i}); 
@@ -58,8 +58,8 @@ end
     sl_ev{i}=array2table(data,'VariableNames',{'Date','SL','std','SL_op_ref','SL_r','std_r','SL_chk_ref','N'},'RowNames',varname(str2name(strrep(events{i}.labels,'"',''))));
     sl_ev{i}.Fecha=datetime(datestr(sl_ev{i}.Date));
     sl_ev{i}=timetable2table(table2timetable(sl_ev{i}));
-    writetable(sl_ev{i},strrep('sl_2016_2019_157.xls','157',num2str(brewer(i))),'WriteRowNames',true)
-    writetable(sl_ev{i},'sl_2016_2019.xls','Sheet',num2str(brewer(i)),'WriteRowNames',true)
+    writetable(sl_ev{i},'IzoTriad_2016_2019.xls','Sheet',strrep('sl_157','157',num2str(brewer(i))),'WriteRowNames',true)
+    %writetable(sl_ev{i},'sl_2016_2019.xls','Sheet',num2str(brewer(i)),'WriteRowNames',true)
    
    
    %% temperature analysis periods
