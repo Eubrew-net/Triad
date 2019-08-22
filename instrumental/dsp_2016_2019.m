@@ -43,18 +43,22 @@ tabla_dsp_ev{i}=report_dispersion_new(Cal,'grp','events','fpath',fullfile(Cal.pa
 jn=~isnan(tabla_dsp{i}.data(:,2));
 dsp_table{i}=array2table(tabla_dsp{i}.data(jn,1:end),'VariableNames',varname(tabla_dsp{i}.data_lbl));
 dsp_table{i}.Date=datetime(datestr(tabla_dsp{i}.data(jn,1)));
-writetable(dsp_table{i},strrep('dsp_157_2016_2019.txt','157',num2str(brewer(i))))
+%writetable(dsp_table{i},strrep('dsp_157_2016_2019.txt','157',num2str(brewer(i))))
 dsp_table{i}=table2timetable(dsp_table{i});
 disp(dsp_table{i})
-
+dsp_table{i}=timetable2table(dsp_table{i});
+writetable(dsp_table{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dsp_157','157',num2str(brewer(i))),'WriteRowNames',true)
+%strrep('dsp_157_2016_2019.txt','157',num2str(brewer(i))))
+%writetable(dt_evt{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dt_157','157',num2str(brewer(i))),'WriteRowNames',true)
 %% tabla por eventos 
 jn=~isnan(tabla_dsp_ev{i}.data(:,2));
 dsp_ev{i}=array2table(tabla_dsp_ev{i}.data(jn,1:end),'VariableNames',varname(tabla_dsp_ev{i}.data_lbl),'Rownames',strrep(varname(tabla_dsp_ev{i}.events(jn)),'x_',''));
 dsp_ev{i}.Date=datetime(datestr(tabla_dsp_ev{i}.data(jn,1)));
-writetable(dsp_ev{i},strrep('dsp_ev_157_2016_2019.txt','157',num2str(brewer(i))))
+%writetable(dsp_ev{i},strrep('dsp_ev_157_2016_2019.txt','157',num2str(brewer(i))))
 dsp_ev{i}=table2timetable(dsp_ev{i});
 disp(dsp_ev{i})
-
+dsp_ev{i}=timetable2table(dsp_ev{i});
+writetable(dsp_ev{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dsp_avg_157','157',num2str(brewer(i))),'WriteRowNames',true)
 
 
 %% figura DSP A1 Residuos frente al promedio -> deberia ser frente a la configuracion
