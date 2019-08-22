@@ -10,7 +10,7 @@ run('../instrumental/read_config_')
 % remove year from cal.path_root
 path_root=Cal.path_root(1:(end-5));
 
-confname=["Cong.Op." "Conf.Alt."];
+confname=["Op","Alt"];
  
 ds_o=cell(3,1);
 ds_a=ds_o;
@@ -99,13 +99,18 @@ x1=smoothdata(ratio1(:,2:end),'gaussian',15,'SamplePoints',ratio1(:,1));
 x2=smoothdata(ratio2(:,2:end),'gaussian',15,'SamplePoints',ratio2(:,1));
 x3=smoothdata(ratio3(:,2:end),'gaussian',15,'SamplePoints',ratio3(:,1));
 
-figure
+f=figure;
+set(f,'Tag','comp_2016_2019');
 plot(ratio1(:,1),x1,'.'); hold all
 %plot(ratio2(:,1),x2,'-','LineWidth',2); hold all
 %plot(ratio2(:,1),x3,':'); hold all
 grid;
 datetick('x',12);
 %title(['Configuracion',num2str(j)])
-title(confname(j))
+title(strcat('Conf. ',confname(j)))
 set(gca,'Ylim',[-2,2]);
 end
+
+ix=sort(findobj('-regexp','Tag','comp_2016_2019'));
+Width=20; Height=10;
+printfiles_report(ix',Cal.dir_figs,'Width',Width,'Height',Height);
