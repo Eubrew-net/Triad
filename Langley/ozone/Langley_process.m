@@ -122,8 +122,10 @@ save(Cal.file_save,'-APPEND','ozone_lgl','cfg_indv','leg','ozone_lgl_sum');
  write_langley(Cal.brw(Cal.n_inst),1619,brw_indv(Cal.n_inst),dbs_indv(Cal.n_inst));
  save(Cal.file_save,'-APPEND','brw_indv','dbs_indv','st_brw','st_dbs','days_lgl','ozone_lgl_dep','langley_table');
  
- 
- 
+%%
+lgl{Cal.n_inst}=load('Langley_Brw185_1619.txt')
+lgl_o3{Cal.n_inst}=sortrows([[lgl{Cal.n_inst}(:,1)+0.25,lgl{Cal.n_inst}(:,2:2:end)];[lgl{Cal.n_inst}(:,1)+0.75,lgl{Cal.n_inst}(:,3:2:end)]],1)
+mean_smooth_abs(lgl_o3{Cal.n_inst}(:,1),lgl_o3{Cal.n_inst}(:,4),60,1)
 
 %% langley por eventos
 % fprintf('Langley por eventos\r\n');
