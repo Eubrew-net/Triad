@@ -67,6 +67,7 @@ for i=1:3
        %lgl_ev_final{i}.Date=str2num(datestr(ev{i}.dates,'yyyymmdd'))
        lgl_ev_final{i}.Date=datetime(datestr(ev{i}.dates));
        lgl_ev_final{i}=timetable2table(table2timetable(lgl_ev_final{i}));
+       writetable(lgl_ev_final{i},'IzoTriad_2016_2019.xls','Sheet',strcat('ETC_final',Cal.brw_str{i}))
     end
     
     %% ejemplo para tablas latex
