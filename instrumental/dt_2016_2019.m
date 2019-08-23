@@ -26,8 +26,8 @@ load('rs2016_2019')
     dt_evt{i}=timetable2table(table2timetable(dt_evt{i}));
     writetable(dt_evt{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dt_157','157',num2str(brewer(i))),'WriteRowNames',true)
 
-f=figure(i)
-set(f,'Tag','dt_2016_2019');
+f(i)=figure(i)
+set(f(i),'Tag','dt_2016_2019');
 dt_avg=dt{i};
 errorbar(dt_avg(:,1),dt_avg(:,32),dt_avg(:,33),'b.')
 hold on;
@@ -46,28 +46,18 @@ title(num2str(brewer(i)))
 grid on;
 legend('dt low','dt high')    
     
-f=figure(2*i)
-set(f,'Tag','dt_2016_2019');
-% Blacklist filtering
-dt_avg=blacklist_summary(fullfile(Cal.path_root,'..','configs',strcat('blacklist_',num2str(brewer(i)),'.txt')),dt{i});
-% Time interval seleccion
-dateini=datenum('2019-01-01');
-dateend=datenum('2020-01-01');
-dt_avg=dt_avg(dt_avg(:,1) > dateini & dt_avg(:,1) < dateend,:);
-
 end
 
 for i=1:3
     
-f=figure(3+i)
-set(f,'Tag','dt_2016_2019');
+f(3+i)=figure(3+i)
+set(f(3+i),'Tag','dt_2016_2019');
 % Blacklist filtering
 dt_avg=blacklist_summary(fullfile(Cal.path_root,'..','configs',strcat('blacklist_',num2str(brewer(i)),'.txt')),dt{i});
 % Time interval seleccion
 dateini=datenum('2019-01-01');
 dateend=datenum('2020-01-01');
 dt_avg=dt_avg(dt_avg(:,1) > dateini & dt_avg(:,1) < dateend,:);
-
 errorbar(dt_avg(:,1),dt_avg(:,32),dt_avg(:,33),'b.')
 hold on;
 box on;
@@ -86,6 +76,5 @@ grid on;
 legend('dt low','dt high')
 end
 
-ix=sort(findobj('-regexp','Tag','dt_2016_2019'));
 Width=20; Height=10;
-printfiles_report(ix',Cal.dir_figs,'Width',Width,'Height',Height);
+printfiles_report(f,Cal.dir_figs,'Width',Width,'Height',Height);
