@@ -1,5 +1,8 @@
 % collecting dsp information
+clear all
 read_config_
+%Cal.dir_figs=fullfile('..',Cal.dir_figs)
+%Cal.dir_tables=fullfile('..',Cal.dir_tables)
 brewer=Cal.brw
 
 % Tabla por eventos
@@ -33,8 +36,9 @@ dsp_ev{i}=[];dsp_table{i}=[];
 Cal.Date.CALC_DAYS=datenum(2015,6,1):now;
 Cal.n_inst=i
 %average for events
-tabla_dsp_ev{i}=report_dispersion_new(Cal,'grp','events','fpath',fullfile(Cal.path_root,'..','DSP'),'process',0,...
-                                           'date_range',Cal.Date.CALC_DAYS);  
+% same events as config
+tabla_dsp_ev{i}=report_dispersion_new(Cal,'grp_custom',events{i},'fpath',fullfile(Cal.path_root,'..','DSP'),'process',0);%,...
+                                     %      'date_range',Cal.Date.CALC_DAYS);  
                                        
 % weekly average in practice all data                                       
 [tabla_dsp{i},dsp_quad{i},dsp_cubic{i}]=report_dispersion_new(Cal,'grp','week','fpath',fullfile(Cal.path_root,'..','DSP'),'process',0,...
@@ -51,14 +55,36 @@ writetable(dsp_table{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dsp_157','157',
 %strrep('dsp_157_2016_2019.txt','157',num2str(brewer(i))))
 %writetable(dt_evt{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dt_157','157',num2str(brewer(i))),'WriteRowNames',true)
 %% tabla por eventos 
-jn=~isnan(tabla_dsp_ev{i}.data(:,2));
+%A1_op=op_cfg{i}(7,:);
+%strmatch('std',tabla_dsp_ev{i}.data_lbl)
+% tabla_dsp_ev{i}.data(:,16)=op_cfg{i}{7,:};
+% tabla_dsp_ev{i}.data_lbl{16}='A1_op';
+% tabla_dsp_ev{i}.data(:,18)=alt_cfg{i}{7,:};
+% tabla_dsp_ev{i}.data_lbl{18}='A1_chk';
+%jn=~isnan(tabla_dsp_ev{i}.data(:,2));
+jn=all(tabla_dsp_ev{i}.data(:,1),2);
 dsp_ev{i}=array2table(tabla_dsp_ev{i}.data(jn,1:end),'VariableNames',varname(tabla_dsp_ev{i}.data_lbl),'Rownames',strrep(varname(tabla_dsp_ev{i}.events(jn)),'x_',''));
 dsp_ev{i}.Date=datetime(datestr(tabla_dsp_ev{i}.data(jn,1)));
+dsp_ev{i}=addvars(dsp_ev{i},alt_cfg{i}{7,:}','After','CSN','NewVariableName','A1_chk');
+dsp_ev{i}=addvars(dsp_ev{i},op_cfg{i}{7,:}','After','CSN','NewVariableName','A1_op');
+dsp_ev{i}=movevars(dsp_ev{i},{'A1Quad_','A1Cubic'},'After','CSN');
+
 %writetable(dsp_ev{i},strrep('dsp_ev_157_2016_2019.txt','157',num2str(brewer(i))))
 dsp_ev{i}=table2timetable(dsp_ev{i});
-disp(dsp_ev{i})
-dsp_ev{i}=timetable2table(dsp_ev{i});
+jn=~isnan(tabla_dsp_ev{i}.data(:,2));
+disp(dsp_ev{i}(jn,:))
+dsp_ev{i}=timetable2table(dsp_ev{i}(jn,:));
+
 writetable(dsp_ev{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dsp_avg_157','157',num2str(brewer(i))),'WriteRowNames',true)
+%%
+f1=figure
+ dx=dsp_ev{i};
+h1=plot(dx.Date,dx.A1Quad_-dx.A1_op,'-rx',dx.Date,dx.A1Cubic-dx.A1_op,'-ro')
+hold all
+h1=plot(dx.Date,dx.A1Quad_-dx.A1_chk,':bx',dx.Date,dx.A1Cubic-dx.A1_chk,':bo')
+grid
+title(Cal.brw_str{i})
+
 
 
 %% figura DSP A1 Residuos frente al promedio -> deberia ser frente a la configuracion
