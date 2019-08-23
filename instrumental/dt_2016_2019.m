@@ -25,13 +25,46 @@ load('rs2016_2019')
     dt_evt{i}.Fecha=datetime(datestr(dt_evt{i}.Date));
     dt_evt{i}=timetable2table(table2timetable(dt_evt{i}));
     writetable(dt_evt{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dt_157','157',num2str(brewer(i))),'WriteRowNames',true)
- 
+
 f=figure(i)
+set(f,'Tag','dt_2016_2019');
+dt_avg=dt{i};
+errorbar(dt_avg(:,1),dt_avg(:,32),dt_avg(:,33),'b.')
+hold on;
+box on;
+errorbar(dt_avg(:,1),dt_avg(:,30),dt_avg(:,31),'r.')
+%h=ploty(smoothdata(dt_avg(:,[1,30,32]),'rloess',90));
+dt_avg_m=meanmonth(dt_avg(:,[1,30,32]));
+h=ploty(dt_avg_m.media(:,[1,5,6]));
+set(h,'Linewidth',4);
+set(h(2),'Color', [0 1 0]);
+set(h(1),'Color', [0 0 0]);
+axis 'tight'
+datetick('x',12,'keepticks','keeplimits')
+ylim(round(median(dt_avg(:,32)))+[-20,20])
+title(num2str(brewer(i)))
+grid on;
+legend('dt low','dt high')    
+    
+f=figure(2*i)
 set(f,'Tag','dt_2016_2019');
 % Blacklist filtering
 dt_avg=blacklist_summary(fullfile(Cal.path_root,'..','configs',strcat('blacklist_',num2str(brewer(i)),'.txt')),dt{i});
 % Time interval seleccion
-dateini=datenum('2016-01-01');
+dateini=datenum('2019-01-01');
+dateend=datenum('2020-01-01');
+dt_avg=dt_avg(dt_avg(:,1) > dateini & dt_avg(:,1) < dateend,:);
+
+end
+
+for i=1:3
+    
+f=figure(3+i)
+set(f,'Tag','dt_2016_2019');
+% Blacklist filtering
+dt_avg=blacklist_summary(fullfile(Cal.path_root,'..','configs',strcat('blacklist_',num2str(brewer(i)),'.txt')),dt{i});
+% Time interval seleccion
+dateini=datenum('2019-01-01');
 dateend=datenum('2020-01-01');
 dt_avg=dt_avg(dt_avg(:,1) > dateini & dt_avg(:,1) < dateend,:);
 
@@ -45,8 +78,6 @@ h=ploty(dt_avg_m.media(:,[1,5,6]));
 set(h,'Linewidth',4);
 set(h(2),'Color', [0 1 0]);
 set(h(1),'Color', [0 0 0]);
-
-
 axis 'tight'
 datetick('x',12,'keepticks','keeplimits')
 ylim(round(median(dt_avg(:,32)))+[-20,20])
