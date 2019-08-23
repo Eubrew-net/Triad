@@ -111,7 +111,7 @@ hold all;
 
 f=figure(findobj('Tag','SLAVG_R6'));
 vline_v(event_info.dates,'k',event_info.labels)
- set(gca,'YLim',median(events_cfg_op.data(17,:))+[-30,30])
+ set(gca,'YLim',median(events_cfg_op.data(17,:))+[-40,40])
 hold all;
 s(1)=stairs([events_cfg_op.data(1,:) sl_data(end,1)],[events_cfg_op.data(17,:) events_cfg_op.data(17,end)],'-','color','m','LineWidth',2);
 hold on
@@ -123,6 +123,7 @@ Width=36; Height=12;
 R6tag=[Cal.brw_str{Cal.n_inst},'_',get(f,'tag')];
 set(f,'tag',R6tag)
 ylim([320 400])
+
 
 f=figure(maxf(findobj('tag','DTAVG')));
 hold on
@@ -153,7 +154,7 @@ input.transposeTable = 1;
 input.tableCaption = 'Brewer #156 average table';
 latex_avg = latexTable(input);
 cellwrite('table_avg_185.tex',latex_avg);
-writetable(table_avg_185,'table_avg_185.xls')
+writetable(table_avg_185,'IzoTriad_2016_2019.xls','Sheet','avg_185')
 
 
 %%
@@ -261,15 +262,44 @@ matrix2latex_ctable(tabla_avg.data(:,2:end)',fullfile(Cal.dir_tables,['table_avg
 
 close all; 
  
-%t.dates=[datenum(2017,6,1),datenum(2018,4,15),datenum(2018,12,15)];
-%t.labels=[{'start','sl_jump','SL chg'}];
+t.dates=[datenum(2015,6,10),datenum(2015,10,15),datenum(2015,11,30),datenum(2016,1,16),datenum(2016,2,1),datenum(2016,3,10),datenum(2016,4,10),datenum(2018,2,14),datenum(2018,3,26),datenum(2019,7,1)];
+t.labels={'IOS','sl_jump','SC','PTB','IZO','KZ','SLnew','HV','HVS','Huelva'};
+
 %t.dates=[datenum(2019,1,1)];
 %t.labels=[{'2019'}];
 %  Hay que mirar si hay cambios en la intensidad de la lampara ->
 %  
  
-%[tabla_tc,sl_raw_185]=report_temperature(Cal,OP_config,OP_config,'grp_custom',t,'reprocess',1);
-[tabla_tc,sl_raw_185]=report_temperature(Cal,OP_config,ALT_config,'grp','events','reprocess',1)
+[tabla_tc,sl_raw_185]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t,'reprocess',1);
+%[tabla_tc,sl_raw_185]=report_temperature(Cal,OP_config,ALT_config,'grp','events','reprocess',1)
+
+
+%%
+[gp,g]=group_time(sl_raw_185,t.dates);
+
+
+f=figure;
+subplot(2,1,2);
+h=gscatter(sl_raw_185(:,1),sl_raw_185(:,end),gp)
+vline_v(t.dates,'-',t.labels)
+grid
+datetick;
+
+subplot(2,1,1);
+gscatter(sl_raw_185(:,1),sl_raw_185(:,end-2),gp,[],[],[],'off')
+vline_v(t.dates,'-',t.labels)
+legend(h,t.labels,'Orientation','horizontal','Location','south')
+grid
+datetick;
+title(Cal.brw_str{3})
+
+set(f,'TAG','SL_EVENTS');
+Width=36; Height=12;
+set(gca,'LooseInset',get(gca,'TightInset'))
+set(f,'tag',[Cal.brw_str{Cal.n_inst},'_',get(f,'tag')])
+printfiles_report(f,Cal.dir_figs,'Width',Width,'Height',Height,'no_export');
+
+
 %% Global temperature
 sl=cat(1,tabla_tc.sl{:});
 sl_m=grpstats(sl(:,[1,end]),{year(sl(:,1)),month(sl(:,1))});
@@ -307,7 +337,7 @@ printfiles_report(f,Cal.dir_figs,'Width',Width,'Height',Height,'no_export');
 %  else
 %     displaytable(tabla_tc.data(:,2:end),tabla_tc.data_lbl,8,'.2f',tabla_tc.events);
 %  end 
- matrix2latex_ctable(tabla_tc.data(:,2:end)',fullfile(Cal.file_latex,['table_tc_',Cal.brw_str{Cal.n_inst},'.tex']),...
+matrix2latex_ctable(tabla_tc.data(:,2:end)',fullfile(Cal.file_latex,['table_tc_',Cal.brw_str{Cal.n_inst},'.tex']),...
                                     'rowlabels',tabla_tc.data_lbl,'columnlabels',tabla_tc.events,...
                                     'alignment','c','resize',0.9);
                                 
