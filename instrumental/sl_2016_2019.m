@@ -1,3 +1,4 @@
+clear all
 sl=cell(3,1);sl_r=cell(3,1);sl_s=cell(3,1);sl_raw=cell(3,1);
 dsum=cell(3,1);
 dsum_r=cell(3,1);
@@ -19,8 +20,8 @@ for i=1:3
     dsum{i}=[];
 for ano=2016:2019
     j=ano-2015;
-   s1_=fullfile(Cal.path_root(1:end-5),'Triad','instrumental',strcat('IZO#',num2str(brewer(i)),'_sl_rw.mat'))
-   %s1_=(strrep( strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/Instrumental/IZO#157_sl_rw.mat','2019',num2str(ano)),'157',num2str(brewer(i))))
+    %s1_=fullfile(Cal.path_root(1:end-5),'Triad','instrumental',strcat('IZO#',num2str(brewer(i)),'_sl_rw.mat'))
+    s1_=(strrep( strrep(fullfile(Cal.path_root,'Triad','Instrumental','IZO#157_sl_rw.mat'),'2019',num2str(ano)),'157',num2str(brewer(i))))
    if exist(s1_)
      s=load(s1_);
      sl_raw{i}=[sl_raw{i};s.sl_rw];
@@ -30,10 +31,10 @@ for ano=2016:2019
      sl_r{i}=[sl_s{i},s.tabla_tc.sl_r];
      sl{i}.events=[sl{i}.events,s.tabla_tc.events];
      
-     s1_=fullfile(Cal.path_root(1:end-5),num2str(ano),'Triad','Langley',strcat('summary_old_Brw',num2str(brewer(i)),'_',num2str(ano),'.txt'))
-     s2_=fullfile(Cal.path_root(1:end-5),num2str(ano),'Triad','Langley',strcat('summary_Brw',num2str(brewer(i)),'_',num2str(ano),'.txt'))
-     %s1_=(strrep( strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/Langley/summary_old_Brw157_2019.txt','2019',num2str(ano)),'157',num2str(brewer(i))))
-     %s2_=(strrep( strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/Langley/summary_Brw157_2019.txt','2019',num2str(ano)),'157',num2str(brewer(i))))
+     %s1_=fullfile(Cal.path_root(1:end-5),num2str(ano),'Triad','Langley',strcat('summary_old_Brw',num2str(brewer(i)),'_',num2str(ano),'.txt'))
+     %s2_=fullfile(Cal.path_root(1:end-5),num2str(ano),'Triad','Langley',strcat('summary_Brw',num2str(brewer(i)),'_',num2str(ano),'.txt'))
+     s1_=(strrep( strrep(fullfile(Cal.path_root,'Triad','Langley','summary_old_Brw157_2019.txt'),'2019',num2str(ano)),'157',num2str(brewer(i))))
+     s2_=(strrep( strrep(fullfile(Cal.path_root,'Triad','Langley','summary_Brw157_2019.txt'),'2019',num2str(ano)),'157',num2str(brewer(i))))
  
      ds=load(s1_);
      ds_r=load(s2_);
