@@ -68,11 +68,9 @@ for i=Cal.n_ref
      %%
      disp(alt_cfg{i})
      disp(events{i}.labels)
-     
+     events{i}.labels=str2var(strrep(events{i}.labels,'"',''));
      try
-          alt_cfg{i}.Properties.VariableNames=str2name(events{i}.labels)';
-          
-          
+          alt_cfg{i}.Properties.VariableNames=str2name(events{i}.labels)'; 
           disp(rows2vars(alt_cfg{i}(1,:)))
           op_cfg{i}.Properties.VariableNames=str2name(events{i}.labels)';
           disp(rows2vars(op_cfg{i}))
