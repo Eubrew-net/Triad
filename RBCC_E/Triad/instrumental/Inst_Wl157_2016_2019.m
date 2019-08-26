@@ -54,7 +54,9 @@ try
    end    
    events_cfg_chk=getcfgs(Cal.Date.CALC_DAYS,ALT_config);    
    fprintf('\nBrewer %s: Second Config.\n',Cal.brw_name{Cal.n_inst});
-   displaytable(events_cfg_chk.data(2:end,:),cellstr(datestr(events_cfg_chk.data(1,:),1))',12,'.5g',events_cfg_chk.legend(2:end));
+   %displaytable(events_cfg_chk.data(2:end,:),cellstr(datestr(events_cfg_chk.data(1,:),1))',12,'.5g',events_cfg_chk.legend(2:end));
+   t157=display_table(events_cfg_chk.data(1:end,:),cellstr(datestr(events_cfg_chk.data(1,:),1))',12,'.5g',events_cfg_chk.legend(1:end));
+   
 catch exception
    fprintf('%s, brewer: %s\n',exception.message,Cal.brw_str{Cal.n_inst});
 end
@@ -81,6 +83,8 @@ event_info.labels
 cellstr(datestr(event_info.dates))'
 
 t_events=display_table(event_info.labels',{'events'},30,'%f',cellstr(datestr(event_info.dates))');
+t_events.Date=event_info.dates;
+t_events.Fecha=datetime(datestr(event_info.dates))
 
 %%eventos importantes-> SELECCIONAMOS LOS IMPORTANTES<-
 ev=table();
@@ -263,12 +267,16 @@ close all;
  
 t.dates=[datenum(2015,6,1),datenum(2016,02,01),datenum(2016,04,10),datenum(2018,2,15),datenum(2018,3,25)];
 t.labels=[{'ios','x1','kzm','j1','j2'}];
-vline_v(t.dates,'r-',t.labels)
+%vline_v(t.dates,'r-',t.labels)
 %t.dates=[datenum(2019,1,1)];
 %t.labels=[{'2019'}];
 %  Hay que mirar si hay cambios en la intensidad de la lampara ->
 %  
 %  aparece una mejora que no se confirma cuando se pone en practica ¿? 
+t_temp=t_events([4,5,11,14,17,18,20,23]+2,:)
+t.dates=t_temp.Date;
+t.labels=t_temp.events;
+
 [tabla_tc,sl_raw_157]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t,'reprocess',0);
 %[tabla_tc,sl_raw_157]=report_temperature(Cal,OP_config,ALT_config,'grp','events','reprocess',0)
 %% Global temperature
