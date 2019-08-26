@@ -1,4 +1,6 @@
-
+%% GENERA GRAFICOS Y TABLAS PARA EL REPORT
+%  tablas de temperatura
+%  
 % read obs from Triad
 sl=cell(3,1);sl_r=cell(3,1);sl_s=cell(3,1);sl_raw=cell(3,1);
 dsum=cell(3,1);
@@ -8,8 +10,8 @@ brewer=[157,183,185]
 read_config_
 %load('events_16_19.mat')
 close all
-% si hay que reporcesar los datos
-%eventos temperatura
+%%
+% eventos temperatura
 ev157=[    {'09-Mar-2016'}    {'17-Mar-2016'}    {'22-May-2017'}    {'31-Mar-2018'}    {'17-Oct-2018'}    {'10-Dec-2018'}    {'15-Apr-2019'}  {'24-May-2019'}];
 t{1}.dates=datenum(ev157)';
 t{1}.labels=[{'Kipp_Zonen'}    {'Cal1000W'}    {'SLJump'}    {'DT'}    {'roof157'}    {'SLReplacement'}    {'SLJump_1'}    {'FixPowerSuply'}];
@@ -19,8 +21,8 @@ t{2}.labels=[{'start','hv','SL chg'}];
 %eventos de temperatura 185
 t{3}.dates=[datenum(2015,6,10),datenum(2015,10,15),datenum(2015,11,30),datenum(2016,1,16),datenum(2016,2,1),datenum(2016,3,10),datenum(2016,4,10),datenum(2018,2,14),datenum(2018,3,26),datenum(2019,7,1)];
 t{3}.labels={'IOS','sl_jump','SC','PTB','IZO','KZ','SLnew','HV','HVS','Huelva'};
-
-% si hay que reprocesar 
+%% 
+%  Analizamos los datos
 for i=1:3
  Cal.n_inst=i;   
  [tabla_tc,sl_raw_157]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t{i},'reprocess',0);
@@ -31,11 +33,13 @@ for i=1:3
                              
    ix=sort(findobj('-regexp','Tag','TEMP_COMP\w+'));
    arrayfun( @(x) set(x,'tag',[Cal.brw_str{Cal.n_inst},'_',get(x,'tag')]),ix)
-   printfiles_report(ix',Cal.dir_figs,'Width',Width,'Height',Height);
+   %Width=20; Height=15;
+   printfiles_report(ix',Cal.dir_figs,'Width',20,'Height',15);
  
 end
 
-
+%% Figuras de temperatura
+%
 for i=1:3
     sl{i}=[];
     sl_s{i}=[];
