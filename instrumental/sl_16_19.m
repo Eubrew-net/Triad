@@ -8,9 +8,35 @@ brewer=[157,183,185]
 read_config_
 %load('events_16_19.mat')
 close all
+% si hay que reporcesar los datos
+%eventos temperatura
+ev157=[    {'09-Mar-2016'}    {'17-Mar-2016'}    {'22-May-2017'}    {'31-Mar-2018'}    {'17-Oct-2018'}    {'10-Dec-2018'}    {'15-Apr-2019'}  {'24-May-2019'}];
+t{1}.dates=datenum(ev157)';
+t{1}.labels=[{'Kipp_Zonen'}    {'Cal1000W'}    {'SLJump'}    {'DT'}    {'roof157'}    {'SLReplacement'}    {'SLJump_1'}    {'FixPowerSuply'}];
+%eventos temperatura 183
+t{2}.dates=[datenum(2015,6,1),datenum(2017,12,10),datenum(2018,05,12)];
+t{2}.labels=[{'start','hv','SL chg'}];
+%eventos de temperatura 185
+t{3}.dates=[datenum(2015,6,10),datenum(2015,10,15),datenum(2015,11,30),datenum(2016,1,16),datenum(2016,2,1),datenum(2016,3,10),datenum(2016,4,10),datenum(2018,2,14),datenum(2018,3,26),datenum(2019,7,1)];
+t{3}.labels={'IOS','sl_jump','SC','PTB','IZO','KZ','SLnew','HV','HVS','Huelva'};
+
+% si hay que reprocesar 
+for i=1:3
+ Cal.n_inst=i;   
+ [tabla_tc,sl_raw_157]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t{i},'reprocess',0);
+ %% salidas latex
+  matrix2latex_ctable(tabla_tc.data(:,2:end)',fullfile(Cal.file_latex,['table_tc_',Cal.brw_str{Cal.n_inst},'.tex']),...
+                                    'rowlabels',tabla_tc.data_lbl,'columnlabels',tabla_tc.events,...
+                                    'alignment','c','resize',0.9);
+                             
+   ix=sort(findobj('-regexp','Tag','TEMP_COMP\w+'));
+   arrayfun( @(x) set(x,'tag',[Cal.brw_str{Cal.n_inst},'_',get(x,'tag')]),ix)
+   printfiles_report(ix',Cal.dir_figs,'Width',Width,'Height',Height);
+ 
+end
 
 
-for i=3
+for i=1:3
     sl{i}=[];
     sl_s{i}=[];
     sl_r{i}=[];
@@ -20,7 +46,7 @@ for i=3
     dsum_r{i}=[];
     dsum{i}=[];
     
-    s1_=(strrep( strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/Instrumental/IZO#157_sl_rw.mat','2019',num2str(ano)),'157',num2str(brewer(i))))
+    s1_=strrep(fullfile(Cal.path_root,'..','Triad','Instrumental','IZO#157_sl_rw.mat'),'157',num2str(brewer(i)))
     if exist(s1_)
         s=load(s1_);
         sl_raw{i}=[sl_raw{i};s.sl_rw];
@@ -35,14 +61,15 @@ for i=3
     figure;
     for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[1,end]),'.'), end; grid; title(num2str(brewer(i)));
     axis tight; datetick('keeplimits')
-    vline_v(sl{i}.dates,'-',sl{i}.events)
-  
+    vline_v(sl{i}.dates,'-',sl{i}.labels)
+    grid on; box on;
+    title(Cal.brw_str(i))
     
 for ano=2016:2019
     j=ano-2015;
        
-     s1_=(strrep( strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/Langley/summary_old_Brw157_2019.txt','2019',num2str(ano)),'157',num2str(brewer(i))))
-     s2_=(strrep( strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/Langley/summary_Brw157_2019.txt','2019',num2str(ano)),'157',num2str(brewer(i))))
+     s1_=(strrep( strrep(fullfile(Cal.path_root,'Triad','Langley','summary_old_Brw157_2019.txt'),'2019',num2str(ano)),'157',num2str(brewer(i))))
+     s2_=(strrep( strrep(fullfile(Cal.path_root,'Triad','Langley','summary_Brw157_2019.txt'),'2019',num2str(ano)),'157',num2str(brewer(i))))
  
      ds=load(s1_);
      ds_r=load(s2_);
@@ -76,7 +103,7 @@ end
    
     
 
-   figure(i*3+1)
+   f1=figure
    h1=plot(dsum{i}(:,1),dsum{i}(:,end),'r+',dsum{i}(:,1),dsum{i}(:,end-1),'k-');
    hold on
    h2=plot(dsum_r{i}(:,1),dsum_r{i}(:,end),'mo',dsum_r{i}(:,1),dsum_r{i}(:,end-1),'b-');
@@ -94,9 +121,11 @@ end
    
    
    % operative vs temp
-   figure(i*3+2);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[2,end]),'.'); end; grid; title(num2str(brewer(i)));
+   f2=figure;
+   for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[2,end]),'.'); end; grid; title(num2str(brewer(i)));
    %  alternative vs temp
-   figure(i*3+3);for j=1:length(sl_r{i}), hold all, ploty(sl_r{i}{j}(:,[2,end]),'.'); end; grid; title(num2str(brewer(i)));
+   f3=figure;
+   for j=1:length(sl_r{i}), hold all, ploty(sl_r{i}{j}(:,[2,end]),'.'); end; grid; title(num2str(brewer(i)));
 
 %    figure(i*4+3);for j=1:length(sl_s{i}), hold all, ploty(sl_s{i}{j}(:,[1,end]),'.'), end; grid; title(num2str(brewer(i)))
 %     axis tight; datetick('keeplimits')
