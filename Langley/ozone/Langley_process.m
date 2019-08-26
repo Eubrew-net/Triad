@@ -19,12 +19,13 @@ end
 Cal.Date.day0=datenum(2015,6,1);
 Cal.Date.dayend=now;%datenum(2018,1,120);
 Date.CALC_DAYS=Cal.Date.day0:Cal.Date.dayend; Cal.Date=Date;
-Cal.file_save  = fullfile('langley_2016_19')
-save(Cal.file_save,'A','ETC','F_corr','SL_B','SL_R','SL_corr_flag','cfg',...
-                             'summary_old','summary_orig_old','summary','summary_orig','ozone_raw0','ozone_raw','ozone_ds','sl','sl_cr','config')
+%Cal.file_save  = fullfile('langley_2016_19')
+%save(Cal.file_save,'A','ETC','F_corr','SL_B','SL_R','SL_corr_flag','cfg',...
+%                             'summary_old','summary_orig_old','summary','summary_orig','ozone_raw0','ozone_raw','ozone_ds','sl','sl_cr','config')
 
 %% Generic
-Cal.n_inst=1;
+for ii=1:3
+    Cal.n_inst=ii
 summ_old{Cal.n_inst}=summary_orig{Cal.n_inst};
 summ{Cal.n_inst}=summary{Cal.n_inst};
 % Langley processing
@@ -84,7 +85,7 @@ save(Cal.file_save,'-APPEND','ozone_lgl','cfg_indv','leg','ozone_lgl_sum');
    lmu{Cal.n_inst}=sortrows([m_brw,se_brw(:,2:end),s_brw(:,2:end),n_brw(:,2:end)]);
    %lsem=sortrows(cat(2,m_brw(:,1),s_brw(:,2:end)),1);
    brw_indv_filter{Cal.n_inst}=brw_indv_{Cal.n_inst};
-   save(Cal.file_save,'-APPEND','lgl_filt','brw_indv_filter');
+  % save(Cal.file_save,'-APPEND','lgl_filt','brw_indv_filter');
 
    %% ---- langley from Indiv. Measurements ----
 
@@ -120,12 +121,14 @@ save(Cal.file_save,'-APPEND','ozone_lgl','cfg_indv','leg','ozone_lgl_sum');
  writetable(langley_table{Cal.n_inst},'Langley_.xls','Sheet',Cal.brw_str{Cal.n_inst})
 
  write_langley(Cal.brw(Cal.n_inst),1619,brw_indv(Cal.n_inst),dbs_indv(Cal.n_inst));
- save(Cal.file_save,'-APPEND','brw_indv','dbs_indv','st_brw','st_dbs','days_lgl','ozone_lgl_dep','langley_table');
+ %save(Cal.file_save,'-APPEND','brw_indv','dbs_indv','st_brw','st_dbs','days_lgl','ozone_lgl_dep','langley_table');
  
-%%
-lgl{Cal.n_inst}=load('Langley_Brw185_1619.txt')
-lgl_o3{Cal.n_inst}=sortrows([[lgl{Cal.n_inst}(:,1)+0.25,lgl{Cal.n_inst}(:,2:2:end)];[lgl{Cal.n_inst}(:,1)+0.75,lgl{Cal.n_inst}(:,3:2:end)]],1)
-mean_smooth_abs(lgl_o3{Cal.n_inst}(:,1),lgl_o3{Cal.n_inst}(:,4),60,1)
+end
+
+% save
+save(Cal.file_save,'-APPEND','lgl_filt','brw_indv_filter');
+save(Cal.file_save,'-APPEND','brw_indv','dbs_indv','st_brw','st_dbs','days_lgl','ozone_lgl_dep','langley_table');
+ 
 
 %% langley por eventos
 % fprintf('Langley por eventos\r\n');
