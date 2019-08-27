@@ -1,19 +1,21 @@
 close all;
+clear all;
 ap=cell(3,1);
+save('ap2016_2019.mat','ap')
 brewer=[157,183,185]
 read_config_
 
 for i=1:3
-%     ap{i}=[];
-%     % rs{i}=[];
-%     for ano=2016:2019
-%         
-%         [ap_]=read_ap_obs(brewer(i),['/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/',num2str(ano)]);
-%         ap{i}=[ap{i};ap_];
-%         %rs{i}=[rs{i};rs_];
-%     end
-%     save('ap2016_2019.mat','-append','ap')
-% end
+    ap{i}=[];
+    % rs{i}=[];
+    for ano=2016:2019
+        
+        [ap_]=read_ap_obs(brewer(i),strrep(fullfile(Cal.path_root),'2019',num2str(ano)));
+        ap{i}=[ap{i};ap_];
+        %rs{i}=[rs{i};rs_];
+    end
+    save('ap2016_2019.mat','-append','ap')
+
 
 load('ap2016_2019')
 
@@ -57,9 +59,9 @@ end
  f(i)=figure(i)
  set(f(i),'Tag','hv_2016_2019');
  ap_avg=ap_ev_table{i};
- ap=ap_table{i};
+ apt=ap_table{i};
  
- plot(ap.Date,ap.HV_on,'x',ap.Date,ap.HV_off,':o')
+ plot(apt.Date,apt.HV_on,'x',apt.Date,apt.HV_off,':o')
  hold on
  errorbar(ap_avg.Date,ap_avg.HV_on,ap_avg.HV_on_std,'b.')
  datetick
@@ -67,11 +69,11 @@ end
  title(num2str(brewer(i)))
 % grid on;
 %%
-temp=strmatch('T',ap.Properties.VariableNames);
+temp=strmatch('T',apt.Properties.VariableNames);
 figure
-plot(ap.Date,ap{:,temp})
-legend(ap.Properties.VariableNames(temp))
-clickableLegend(ap.Properties.VariableNames(temp))
+plot(apt.Date,apt{:,temp})
+legend(apt.Properties.VariableNames(temp))
+clickableLegend(apt.Properties.VariableNames(temp))
 datetick('x',12,'keepticks','keeplimits')
 grid
 vline_v(events{i}.dates,'-',strrep(events{i}.labels,'_',' '))
@@ -79,9 +81,9 @@ title(num2str(brewer(i)))
 % grid on; 
 %% Voltajes
 figure
-temp=strmatch('V',ap.Properties.VariableNames);
-plot(ap.Date,ap{:,temp}-round(mean(ap{:,temp})))
-clickableLegend(ap.Properties.VariableNames(temp))
+temp=strmatch('V',apt.Properties.VariableNames);
+plot(apt.Date,apt{:,temp}-round(mean(apt{:,temp})))
+clickableLegend(apt.Properties.VariableNames(temp))
 datetick('x',12,'keepticks','keeplimits')
 grid
 vline_v(events{i}.dates,'-',strrep(events{i}.labels,'_',' '))
