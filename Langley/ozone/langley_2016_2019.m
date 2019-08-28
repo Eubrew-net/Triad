@@ -1,11 +1,13 @@
-if ismac
-   path_root='/Users/aredondasm/CODE/rbcce.aemet.es/iberonesia/RBCC_E/Triad/2019/Triad/ozone/';%Langley_Brw157_2019.txt'	
-end
+clear all
+% ejecutamos la configuracion
+%run(fullfile(path_root,'..','Triad','read_config_'));
+run(fullfile('..','..','read_config_'));
+path_root=fullfile(Cal.path_root);
+% not used
+%fblacklist=fullfile(path_root,'configs',['blacklist_',num2str(brewer(i)),'.txt']); 
 
-read_config_;
 
-
-%% eventos finales
+%% eventos langley finales
 % 157
 ev=cell(3,1);
 
@@ -19,6 +21,15 @@ ev{2}.labels=[events{2}.labels([1,9,13,15,16])];
 ev{2}.op_ETC=[op_cfg{2}{8,[1,9,13,15,16]}];
 ev{2}.alt_ETC=[alt_cfg{2}{8,[1,9,13,15,16]}];
 
+% 185
+importantes=[4,7,8,10,14,16,18,19,24,26,28,30,31];
+ev{3}.dates=events{3}.dates(importantes);
+ev{3}.labels=[events{3}.labels(importantes)];
+ev{3}.op_ETC=[op_cfg{3}{8,importantes}];
+ev{3}.alt_ETC=[alt_cfg{3}{8,importantes}];
+
+
+
 lgl=cell(3,1);
 op=lgl;
 alt=op;
@@ -27,18 +38,19 @@ lgl_ev=op;
 brewer=[157,183,185];
 ano0=2014;
 s=[];
-for i=1:3
+for i=3
     lgl{i}=[];
     
     for ano=2015:2019
         j=ano-2014;
-        s1_=(strrep( strrep(fullfile(path_root,'Langley_Brw157_2019.txt'),...
-                           '2019',num2str(ano)),'157',num2str(brewer(i))))
+        s1_=(strrep( strrep(fullfile(path_root,'Triad','Langley','ozone','Langley_Brw157_2019.txt'),...
+                           '2019',num2str(ano)),'157',num2str(brewer(i))));
         if exist(s1_)
             s=load(s1_);
             lgl{i}=[lgl{i};s];
         else
-           warning([ num2str(brewer(i)),'_',num2str(ano) ])
+           warning([ num2str(brewer(i)),'_',num2str(ano) ]);
+           disp(s1_)
         end
         
     end
