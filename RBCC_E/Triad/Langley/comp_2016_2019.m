@@ -8,15 +8,19 @@
 run('../instrumental/read_config_')
 
 % remove year from cal.path_root
-path_root=Cal.path_root(1:(end-5));
-
+path_root=fullfile(Cal.path_root,'..');
+fblacklist=fullfile(path_root,'configs',['blacklist_',num2str(brewer(i)),'.txt']);  
 confname=["Op","Alt"];
- 
+Width=20; Height=10; 
+
 ds_o=cell(3,1);
 ds_a=ds_o;
-
+ds=cell(3,2);
 brewer=[157,183,185];
 ano0=2014;
+
+
+
 for i=1:3
     ds_o{i}=[];
     ds_a{i}=[];
@@ -48,7 +52,7 @@ for i=1:3
     
     %%Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref R6_calc
     
- fblacklist=fullfile(path_root,'configs',['blacklist_',num2str(brewer(i)),'.txt']);  
+ 
     
  ds{i,1}=blacklist_summary(fblacklist,ds_o{i});
  ds{i,2}=blacklist_summary(fblacklist,ds_a{i});
@@ -112,5 +116,5 @@ set(gca,'Ylim',[-2,2]);
 end
 
 ix=sort(findobj('-regexp','Tag','comp_2016_2019'));
-Width=20; Height=10;
+
 printfiles_report(ix',Cal.dir_figs,'Width',Width,'Height',Height);
