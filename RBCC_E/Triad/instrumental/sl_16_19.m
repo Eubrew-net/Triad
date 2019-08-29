@@ -2,12 +2,11 @@
 %  tablas de temperatura
 %  
 % read obs from Triad
+run(fullfile('..','read_config_'));
 sl=cell(3,1);sl_r=cell(3,1);sl_s=cell(3,1);sl_raw=cell(3,1);
 dsum=cell(3,1);
 dsum_r=cell(3,1);
 brewer=[157,183,185]
-
-read_config_
 %load('events_16_19.mat')
 close all
 %%
@@ -19,24 +18,25 @@ t{1}.labels=[{'Kipp_Zonen'}    {'Cal1000W'}    {'SLJump'}    {'DT'}    {'roof157
 t{2}.dates=[datenum(2015,6,1),datenum(2017,12,10),datenum(2018,05,12)];
 t{2}.labels=[{'start','hv','SL chg'}];
 %eventos de temperatura 185
-t{3}.dates=[datenum(2015,6,10),datenum(2015,10,15),datenum(2015,11,30),datenum(2016,1,16),datenum(2016,2,1),datenum(2016,3,10),datenum(2016,4,10),datenum(2018,2,14),datenum(2018,3,26),datenum(2019,7,1)];
+t{3}.dates=[datenum(2015,6,10),datenum(2015,10,15),datenum(2015,11,30),datenum(2016,1,16),datenum(2016,2,1),datenum(2016,3,10),...
+             datenum(2016,4,10),datenum(2018,2,14),datenum(2018,3,26),datenum(2019,7,1)];
 t{3}.labels={'IOS','sl_jump','SC','PTB','IZO','KZ','SLnew','HV','HVS','Huelva'};
 %% 
 %  Analizamos los datos
-for i=1:3
- Cal.n_inst=i;   
- [tabla_tc,sl_raw_157]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t{i},'reprocess',0);
- %% salidas latex
-  matrix2latex_ctable(tabla_tc.data(:,2:end)',fullfile(Cal.file_latex,['table_tc_',Cal.brw_str{Cal.n_inst},'.tex']),...
-                                    'rowlabels',tabla_tc.data_lbl,'columnlabels',tabla_tc.events,...
-                                    'alignment','c','resize',0.9);
-                             
-   ix=sort(findobj('-regexp','Tag','TEMP_COMP\w+'));
-   arrayfun( @(x) set(x,'tag',[Cal.brw_str{Cal.n_inst},'_',get(x,'tag')]),ix)
-   %Width=20; Height=15;
-   printfiles_report(ix',Cal.dir_figs,'Width',20,'Height',15);
- 
-end
+% for i=1:3
+%  Cal.n_inst=i;   
+%  [tabla_tc,sl_raw_{i}]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t{i},'reprocess',0);
+%  %% salidas latex
+%   matrix2latex_ctable(tabla_tc.data(:,2:end)',fullfile(Cal.file_latex,['table_tc_',Cal.brw_str{Cal.n_inst},'.tex']),...
+%                                     'rowlabels',tabla_tc.data_lbl,'columnlabels',tabla_tc.events,...
+%                                     'alignment','c','resize',0.9);
+%                              
+%    ix=sort(findobj('-regexp','Tag','TEMP_COMP\w+'));
+%    arrayfun( @(x) set(x,'tag',[Cal.brw_str{Cal.n_inst},'_',get(x,'tag')]),ix)
+%    %Width=20; Height=15;
+%    printfiles_report(ix',Cal.dir_figs,'Width',20,'Height',15);
+%  
+% end
 
 %% Figuras de temperatura
 %
