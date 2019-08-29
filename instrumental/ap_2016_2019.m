@@ -1,8 +1,11 @@
 close all;
 clear all;
+run(fullfile('..','read_config_'))
+
+
+
 ap=cell(3,1);
 brewer=[157,183,185]
-read_config_
 reprocess=0;
 
 
