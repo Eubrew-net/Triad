@@ -1,6 +1,6 @@
 % collecting dsp information
 clear all
-read_config_
+run(fullfile('..','read_config_'));
 %Cal.dir_figs=fullfile('..',Cal.dir_figs)
 %Cal.dir_tables=fullfile('..',Cal.dir_tables)
 brewer=Cal.brw
@@ -22,6 +22,46 @@ dsp_ev=cell(3,1);
 dsp_table=cell(3,1);
 
 
+%% eventos langley finales
+ev=cell(3,1);
+
+% 157
+importantes{1}=[1,1,17,20,23];
+ev{1}.dates=events{1}.dates(importantes{1});
+ev{1}.labels=events{1}.labels(importantes{1});
+% añadimos ios 2015 (revisar)
+ev{1}.dates(1)=datenum(2015,6,10);
+ev{1}.labels(1)={'IOS_'};
+
+
+ev{1}.op_ETC=[op_cfg{1}{8,[importantes{1}]}];
+ev{1}.alt_ETC=[alt_cfg{1}{8,importantes{1}}];
+ev{1}.op_A1=[op_cfg{1}{7,importantes{1}}];
+ev{1}.alt_A1=[alt_cfg{1}{7,importantes{1}}];
+
+
+% 183
+importantes{2}=[1,9,13,15,16];
+ev{2}.dates=events{2}.dates(importantes{2});
+ev{2}.labels=events{2}.labels(importantes{2});
+ev{2}.op_ETC=[op_cfg{2}{8,[importantes{2}]}];
+ev{2}.alt_ETC=[alt_cfg{2}{8,importantes{2}}];
+ev{2}.op_A2=[op_cfg{2}{7,importantes{2}}];
+ev{2}.alt_A2=[alt_cfg{2}{7,importantes{2}}]
+
+% 185
+importantes{3}=[4,7,8,10,14,16,18,19,24,26,28,30,31];
+ev{3}.dates=events{3}.dates(importantes{3});
+ev{3}.labels=events{3}.labels(importantes{3});
+ev{3}.op_ETC=[op_cfg{3}{8,[importantes{3}]}];
+ev{3}.alt_ETC=[alt_cfg{3}{8,importantes{3}}];
+ev{3}.op_A3=[op_cfg{3}{7,importantes{3}}];
+ev{3}.alt_A3=[alt_cfg{3}{7,importantes{3}}]
+
+
+
+
+
 for i=1:3
 
 % salidas del report    
@@ -38,8 +78,10 @@ Cal.n_inst=i
 %average for events
 % same events as config
 tabla_dsp_ev{i}=report_dispersion_new(Cal,'grp_custom',events{i},'fpath',fullfile(Cal.path_root,'..','DSP'),'process',0);%,...
-                                     %      'date_range',Cal.Date.CALC_DAYS);  
-                                       
+                                   %      'date_range',Cal.Date.CALC_DAYS);  
+% importantes todos                                     
+importantes{i}=1:size(events{i}.dates,1)          
+
 % weekly average in practice all data                                       
 [tabla_dsp{i},dsp_quad{i},dsp_cubic{i}]=report_dispersion_new(Cal,'grp','week','fpath',fullfile(Cal.path_root,'..','DSP'),'process',0,...
                                            'date_range',Cal.Date.CALC_DAYS);  
@@ -65,17 +107,19 @@ writetable(dsp_table{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dsp_157','157',
 jn=all(tabla_dsp_ev{i}.data(:,1),2);
 dsp_ev{i}=array2table(tabla_dsp_ev{i}.data(jn,1:end),'VariableNames',varname(tabla_dsp_ev{i}.data_lbl),'Rownames',strrep(varname(tabla_dsp_ev{i}.events(jn)),'x_',''));
 dsp_ev{i}.Date=datetime(datestr(tabla_dsp_ev{i}.data(jn,1)));
-dsp_ev{i}=addvars(dsp_ev{i},alt_cfg{i}{7,:}','After','CSN','NewVariableName','A1_chk');
-dsp_ev{i}=addvars(dsp_ev{i},op_cfg{i}{7,:}','After','CSN','NewVariableName','A1_op');
-dsp_ev{i}=movevars(dsp_ev{i},{'A1Quad_','A1Cubic'},'After','CSN');
-
-%writetable(dsp_ev{i},strrep('dsp_ev_157_2016_2019.txt','157',num2str(brewer(i))))
+dsp_ev{i}=addvars(dsp_ev{i},alt_cfg{i}{7,importantes{i}}','After','CSN','NewVariableName','A1_chk');
+dsp_ev{i}=addvars(dsp_ev{i},op_cfg{i}{7,importantes{i}}','After','CSN','NewVariableName','A1_op');
+dsp_ev{i}=movevars(dsp_ev{i},{'A1Quad_','std'},'After','CSN');
+dsp_ev{i}=movevars(dsp_ev{i},{'A1Cubic','std_1','N'},'After','CSN');
 dsp_ev{i}=table2timetable(dsp_ev{i});
 jn=~isnan(tabla_dsp_ev{i}.data(:,2));
 disp(dsp_ev{i}(jn,:))
 dsp_ev{i}=timetable2table(dsp_ev{i}(jn,:));
 
-writetable(dsp_ev{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dsp_avg_157','157',num2str(brewer(i))),'WriteRowNames',true)
+
+writetable(dsp_ev{i},'IzoTriad_2016_2019.xls','Sheet',strrep('dsp_final_157','157',num2str(brewer(i))),'WriteRowNames',true)
+%writetable(dsp_ev{i},strrep('dsp_ev_157_2016_2019.txt','157',num2str(brewer(i))))
+
 %%
 f1=figure
  dx=dsp_ev{i};
