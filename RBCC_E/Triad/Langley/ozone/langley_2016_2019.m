@@ -10,26 +10,7 @@ path_root=fullfile(Cal.path_root);
 %% eventos langley finales
 % 157
 ev=cell(3,1);
-
-ev{1}.dates=events{1}.dates([1,17,20,23]);
-ev{1}.labels=[events{1}.labels([1,17,20,23])];
-ev{1}.op_ETC=[op_cfg{1}{8,[1,17,20,23]}];
-ev{1}.alt_ETC=[alt_cfg{1}{8,[1,17,20,23]}];
-% 183
-ev{2}.dates=events{2}.dates([1,9,13,15,16]);
-ev{2}.labels=[events{2}.labels([1,9,13,15,16])];
-ev{2}.op_ETC=[op_cfg{2}{8,[1,9,13,15,16]}];
-ev{2}.alt_ETC=[alt_cfg{2}{8,[1,9,13,15,16]}];
-
-% 185
-importantes=[4,7,8,10,14,16,18,19,24,26,28,30,31];
-ev{3}.dates=events{3}.dates(importantes);
-ev{3}.labels=[events{3}.labels(importantes)];
-ev{3}.op_ETC=[op_cfg{3}{8,importantes}];
-ev{3}.alt_ETC=[alt_cfg{3}{8,importantes}];
-
-
-
+%%
 lgl=cell(3,1);
 op=lgl;
 alt=op;
@@ -38,7 +19,53 @@ lgl_ev=op;
 brewer=[157,183,185];
 ano0=2014;
 s=[];
-for i=3
+
+
+%% eventos langley finales
+ev=cell(3,1);
+
+% 157
+importantes{1}=[1,1,17,20,23];
+ev{1}.dates=events{1}.dates(importantes{1});
+ev{1}.labels=events{1}.labels(importantes{1});
+% añadimos ios 2015 (revisar)
+ev{1}.dates(1)=datenum(2015,6,10);
+ev{1}.labels(1)={'IOS_'};
+ev{1}.op_ETC=[op_cfg{1}{8,[importantes{1}]}];
+ev{1}.alt_ETC=[alt_cfg{1}{8,importantes{1}}];
+ev{1}.op_A1=[op_cfg{1}{7,importantes{1}}];
+ev{1}.alt_A1=[alt_cfg{1}{7,importantes{1}}];
+
+
+% 183
+importantes{2}=[1,9,13,15,16];
+ev{2}.dates=events{2}.dates(importantes{2});
+ev{2}.labels=events{2}.labels(importantes{2});
+ev{2}.op_ETC=[op_cfg{2}{8,[importantes{2}]}];
+ev{2}.alt_ETC=[alt_cfg{2}{8,importantes{2}}];
+ev{2}.op_A2=[op_cfg{2}{7,importantes{2}}];
+ev{2}.alt_A2=[alt_cfg{2}{7,importantes{2}}]
+
+% 185
+importantes{3}=[4,7,8,10,14,16,18,19,24,26,28,30,31];
+ev{3}.dates=events{3}.dates(importantes{3});
+ev{3}.labels=events{3}.labels(importantes{3});
+ev{3}.op_ETC=[op_cfg{3}{8,[importantes{3}]}];
+ev{3}.alt_ETC=[alt_cfg{3}{8,importantes{3}}];
+ev{3}.op_A3=[op_cfg{3}{7,importantes{3}}];
+ev{3}.alt_A3=[alt_cfg{3}{7,importantes{3}}]
+
+
+
+
+
+
+
+%%
+
+for i=1:3
+    
+    %%
     lgl{i}=[];
     
     for ano=2015:2019
@@ -80,20 +107,25 @@ for i=3
        %lgl_ev_final{i}.Date=str2num(datestr(ev{i}.dates,'yyyymmdd'))
        lgl_ev_final{i}.Date=datetime(datestr(ev{i}.dates));
        lgl_ev_final{i}=timetable2table(table2timetable(lgl_ev_final{i}));
+       lgl_ev_final{i}=addvars(lgl_ev_final{i},alt_cfg{i}{7,importantes{i}}','After','N','NewVariableName','A1_chk');
+       lgl_ev_final{i}=addvars(lgl_ev_final{i},op_cfg{i}{7,importantes{i}}','After','N','NewVariableName','A1_op');
+       
+       
+       disp(lgl_ev_final{i})
        writetable(lgl_ev_final{i},'IzoTriad_2016_2019.xls','Sheet',strcat('ETC_final',Cal.brw_str{i}))
     end
     
-    %% ejemplo para tablas latex
+    % ejemplo para tablas latex
     input.data=lgl_ev{i};
     % Switch transposing/pivoting your table if needed:
     input.transposeTable = 0;
     % Switch to generate a complete LaTex document or just a table:
-    input.makeCompleteLatexDocument = 0;
-    l=latexTable(input);
-    cellwrite(sprintf('langley_eventos_%03d.tex',brewer(i)),l);
+    %input.makeCompleteLatexDocument = 0;
+    %l=latexTable(input);
+    %cellwrite(sprintf('langley_eventos_%03d.tex',brewer(i)),l);
     
     
-    
+    %% outputs 
     figure
     
     mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,2),60,1);
@@ -111,7 +143,7 @@ for i=3
     set(gca,'LooseInset',get(gca,'TightInset'))
     
     
-    
+    %% operative
     figure
     
     mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,4),60,1);
@@ -127,6 +159,10 @@ for i=3
     xlim([datenum(2015,12,1),now])
     set(gca,'LooseInset',get(gca,'TightInset'))
     
+    %% summary
+    disp(lgl_ev_final{i})
+    
+    snapnow
 end
 
 
