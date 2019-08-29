@@ -4,7 +4,7 @@
 
 read_config_;
 
- path_root= '.'
+path_root= '.'
 
 %% eventos finales
 ev{1}.dates=events{1}.dates([1,17,20,23]);
