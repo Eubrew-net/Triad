@@ -35,7 +35,7 @@ for i=1:3
        
         if exist(s1_)
             s=load(s1_);
-            ds_a{i}=[ds_a{i};s(:,1:15)];
+            ds_a{i}=[ds_a{i};s(:,1:15)];  % write summary incorpora ahora A1 y ETC para recalcular el ozono, los ficheros antiguos no lo hacen
         else
            warning([s1_ ,'not found'])
         end    
