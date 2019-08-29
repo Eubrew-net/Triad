@@ -1,12 +1,15 @@
-clear all
+
+run(fullfile('..','read_config_'));
+%load('events_16_19.mat')
+clc
+close all
 sl=cell(3,1);sl_r=cell(3,1);sl_s=cell(3,1);sl_raw=cell(3,1);
 dsum=cell(3,1);
 dsum_r=cell(3,1);
 brewer=[157,183,185]
 
-read_config_
-%load('events_16_19.mat')
-close all
+
+
 
 
 for i=1:3
