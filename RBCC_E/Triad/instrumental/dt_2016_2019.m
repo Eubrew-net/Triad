@@ -1,7 +1,9 @@
 close all;
+run(fullfile('..','read_config_'));
+
 dt=cell(3,1);rs=cell(3,1);
 brewer=[157,183,185]
-read_config_
+
 for i=1:3
     dt{i}=[];
     rs{i}=[];
