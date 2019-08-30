@@ -9,6 +9,9 @@ dsum_r=cell(3,1);
 brewer=[157,183,185]
 %load('events_16_19.mat')
 close all
+
+reprocess=0; % 1 to reprocess all the data (section "Analizamos los datos" below)
+
 %%
 % eventos temperatura 157
 ev157=[    {'09-Mar-2016'}    {'17-Mar-2016'}    {'22-May-2017'}    {'31-Mar-2018'}    {'17-Oct-2018'}    {'10-Dec-2018'}    {'15-Apr-2019'}  {'24-May-2019'}];
@@ -23,21 +26,23 @@ t{3}.dates=[datenum(2015,6,10),datenum(2015,10,15),datenum(2015,11,30),datenum(2
 t{3}.labels={'IOS','sl_jump','SC','PTB','IZO','KZ','SLnew','HV','HVS','Huelva'};
 %% 
 %  Analizamos los datos
-% for i=1:3
-%  Cal.n_inst=i;   
-%  [tabla_tc,sl_raw_{i}]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t{i},'reprocess',0);
-%  %% salidas latex
-%   matrix2latex_ctable(tabla_tc.data(:,2:end)',fullfile(Cal.file_latex,['table_tc_',Cal.brw_str{Cal.n_inst},'.tex']),...
-%                                     'rowlabels',tabla_tc.data_lbl,'columnlabels',tabla_tc.events,...
-%                                     'alignment','c','resize',0.9);
-%                              
-%    ix=sort(findobj('-regexp','Tag','TEMP_COMP\w+'));
-%    arrayfun( @(x) set(x,'tag',[Cal.brw_str{Cal.n_inst},'_',get(x,'tag')]),ix)
-%    %Width=20; Height=15;
-%    printfiles_report(ix',Cal.dir_figs,'Width',20,'Height',15);
-%  
-% end
+if reprocess
 
+  for i=1:3
+  Cal.n_inst=i;   
+  [tabla_tc,sl_raw_{i}]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t{i},'reprocess',0);
+  %% salidas latex
+   matrix2latex_ctable(tabla_tc.data(:,2:end)',fullfile(Cal.file_latex,['table_tc_',Cal.brw_str{Cal.n_inst},'.tex']),...
+                                     'rowlabels',tabla_tc.data_lbl,'columnlabels',tabla_tc.events,...
+                                     'alignment','c','resize',0.9);
+                              
+    ix=sort(findobj('-regexp','Tag','TEMP_COMP\w+'));
+    arrayfun( @(x) set(x,'tag',[Cal.brw_str{Cal.n_inst},'_',get(x,'tag')]),ix)
+    %Width=20; Height=15;
+    printfiles_report(ix',Cal.dir_figs,'Width',20,'Height',15);
+  
+ end
+end
 %% Figuras de temperatura
 %
 for i=1:3
@@ -50,7 +55,7 @@ for i=1:3
     dsum_r{i}=[];
     dsum{i}=[];
     
-    s1_=strrep(fullfile(Cal.path_root,'..','Triad','Instrumental','IZO#157_sl_rw.mat'),'157',num2str(brewer(i)))
+    s1_=strrep(fullfile(Cal.path_root,'..','Triad','instrumental','IZO#157_sl_rw.mat'),'157',num2str(brewer(i))) %J Instrumental -> instrumental
     if exist(s1_)
         s=load(s1_);
         sl_raw{i}=[sl_raw{i};s.sl_rw];
