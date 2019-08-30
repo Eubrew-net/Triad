@@ -77,15 +77,32 @@ save(Cal.file_save,'-APPEND','ozone_lgl','cfg_indv','leg','ozone_lgl_sum');
 
    brw_indv_{Cal.n_inst} = langley_analys_filter(lgl_filt,Cal.n_inst,...
                                          'res_filt',1,'plot_flag',0);
+%%
 
-   nd0_=cat(1,brw_indv_{Cal.n_inst}(:,[1 2],cfgs),brw_indv_{Cal.n_inst}(:,[1 6],cfgs)); nd0=sortrows(nd0_,1);
-   nd3_=cat(1,brw_indv_{Cal.n_inst}(:,[1 3],cfgs),brw_indv_{Cal.n_inst}(:,[1 7],cfgs)); nd3=sortrows(nd3_,1);
-   nd4_=cat(1,brw_indv_{Cal.n_inst}(:,[1 4],cfgs),brw_indv_{Cal.n_inst}(:,[1 8],cfgs)); nd4=sortrows(nd4_,1);
-   [m_brw,se_brw,s_brw,n_brw]=grpstats([nd0(:,1) nd3(:,2)-nd0(:,2),nd4(:,2)-nd0(:,2)],grp_def(nd0(:,1)),{'mean','sem','std','numel'});
-   lmu{Cal.n_inst}=sortrows([m_brw,se_brw(:,2:end),s_brw(:,2:end),n_brw(:,2:end)]);
-   %lsem=sortrows(cat(2,m_brw(:,1),s_brw(:,2:end)),1);
+
+   nd0_=cat(1,brw_indv_{Cal.n_inst}(:,[1 2],cfgs),[brw_indv_{Cal.n_inst}(:,1,cfgs)+0.5,brw_indv_{Cal.n_inst}(:,[6],cfgs)]); nd0=sortrows(nd0_,1);
+   nd3_=cat(1,brw_indv_{Cal.n_inst}(:,[1 3],cfgs),[brw_indv_{Cal.n_inst}(:,1,cfgs)+0.5,brw_indv_{Cal.n_inst}(:,7,cfgs)]); nd3=sortrows(nd3_,1);
+   nd4_=cat(1,brw_indv_{Cal.n_inst}(:,[1 4],cfgs),[brw_indv_{Cal.n_inst}(:,1,cfgs)+0.5,brw_indv_{Cal.n_inst}(:,8,cfgs)]); nd4=sortrows(nd4_,1);
+     %lsem=sortrows(cat(2,m_brw(:,1),s_brw(:,2:end)),1);
    brw_indv_filter{Cal.n_inst}=brw_indv_{Cal.n_inst};
   % save(Cal.file_save,'-APPEND','lgl_filt','brw_indv_filter');
+   nd0_2=cat(1,brw_indv_{Cal.n_inst}(:,[1 2],cfgs+1),[brw_indv_{Cal.n_inst}(:,1,cfgs)+0.5,brw_indv_{Cal.n_inst}(:,[6],cfgs)]); nd0_2=sortrows(nd0_2,1);
+   nd3_2=cat(1,brw_indv_{Cal.n_inst}(:,[1 3],cfgs+1),[brw_indv_{Cal.n_inst}(:,1,cfgs)+0.5,brw_indv_{Cal.n_inst}(:,[7],cfgs)]); nd3_2=sortrows(nd3_2,1);
+   nd4_2=cat(1,brw_indv_{Cal.n_inst}(:,[1 4],cfgs+1),[brw_indv_{Cal.n_inst}(:,1,cfgs)+0.5,brw_indv_{Cal.n_inst}(:,[8],cfgs)]); nd4_2=sortrows(nd4_2,1);
+
+  %  Salidas
+           
+    %t_days=array2table(days_lgl{Cal.n_inst}.data,'VariableNames',varname(days_lgl{Cal.n_inst}.labels),'Rownames',cellstr(datestr(days_lgl{Cal.n_inst}.data(:,1))));                  
+    l_data_filter{Cal.n_inst}=array2table([nd0,nd3(:,2)-nd0(:,2),nd4(:,2)-nd0(:,2),nd0_2(:,2),nd3_2(:,2)-nd0_2(:,2),nd4_2(:,2)-nd0_2(:,2)],...
+     'VariableNames',{'Diaj','ETC0','ND3','ND4','ETC0_cfg2','ND3_cfg2','ND4_cfg2'},...
+     'Rownames',cellstr(datestr(nd0(:,1))));  
+ 
+ 
+    writetable(l_data_filter{Cal.n_inst},'Langley_.xls','Sheet',strcat('filter_',Cal.brw_str{Cal.n_inst}))
+    writetable(l_data_filter{Cal.n_inst},strcat('Langley_filter_',Cal.brw_str{Cal.n_inst}))
+
+  
+  
 
    %% ---- langley from Indiv. Measurements ----
 
