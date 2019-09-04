@@ -88,11 +88,20 @@ for i=Cal.n_ref
     end
     
 
-    t_events{i}=array2table(events{i}.dates,'RowNames',str2name(str2var(events{i}.labels)),'VariableNames',{'Date_mat'});
+    t_events{i}=array2table(events{i}.dates,'VariableNames',{'Date_mat'},...
+        'RowNames', str2name(strcat(['B',Cal.brw_str{i},'_'],events{i}.labels)));
+    %'RowNames',str2name(str2var(events{i}.labels))
     t_events{i}.Date=datetime(datestr(t_events{i}.Date_mat))
-    
+    t_events{i}.Brw=Cal.brw(i)*ones(height(t_events{i}),1);
+    t_events{i}.label=str2name(str2var(events{i}.labels))';
 end
+
+brw_events=table2timetable(vertcat(t_events{:}));
+brw_events=sortrows(brw_events,'Date')
+
 save   alt_cfg_16_19 alt_cfg
 save   op_cfg_16_19  op_cfg
 save   events_16_19 events
-save   t_events_16_19 t_events
+save   t_events_16_19 t_events brw_events
+
+writetable(timetable2table(brw_events),'triada_eventos.xls')
