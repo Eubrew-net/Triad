@@ -25,7 +25,7 @@ else
     disp('clean');
 end
 
-
+%%
 
 % READ Brewer Summaries
 Cal.n_ref=Cal.n_ref;
@@ -161,27 +161,61 @@ close all
 [A,ETC,SL_B,SL_R,F_corr,SL_corr_flag,cfg]=read_cal_config_new(config,Cal,{sl_median_o,sl_median_n});
 
 % Data recalculation for summaries  and individual observations
+dep=cell(3,2);
 for i=Cal.n_ref
     cal{i}={}; summary_orig{i}={}; summary_orig_old{i}={};
     [cal{i},summary_orig{i},summary_orig_old{i}]=test_recalculation(Cal,i,ozone_ds,A,SL_R,SL_B,...
                                           'flag_sl',1,'plot_sl',1,'flag_sl_corr',SL_corr_flag);
     % filter correction
     [summary_old{i} summary{i}]=filter_corr(summary_orig,summary_orig_old,i,A,F_corr{i});
+    
+        % depuration
+    fblacklist=fullfile(Cal.path_root,'..','configs',['blacklist_',Cal.brw_str{i},'.txt'])
+    %dep{i}=cellfun(@(x) blacklist_summary(fblacklist,x),{summary_old{i} summary{i}},'UniformOutput',false)
+    dep{i,1}=blacklist_summary(fblacklist,summary_old{i});
+    dep{i,2}=blacklist_summary(fblacklist,summary{i});
+    
+  
+    
 end
-t_sum=write_summary_cfg((1:3),20162019,summary_old,summary,SL_R,SL_B,A,ETC);
+
+% fblacklist=fullfile(Cal.path_root,'configs',['blacklist_',Cal.brw_str{i},'.txt'])
+%     ds_dep{i,:}=cellfun(@(x) blacklist_summary(fblacklist,table2array(x)),squeeze(t_sum(:,i,:)),'UniformOutput',false)
+
+
+t_sum=write_summary_cfg((1:3),20162019,dep(:,1)',dep(:,2)',SL_R,SL_B,A,ETC);
 save(Cal.file_save,'-APPEND','A','ETC','F_corr','SL_B','SL_R','SL_corr_flag','cfg',...
                              'summary_old','summary_orig_old','summary','summary_orig','t_sum');
 %% Outliers? Los detectamos
 ref=[];
 for ii=Cal.n_ref
-    med=summary_old{ii}(:,[1 6]); meds=summary_old{ii}(:,[1 7]);
+    med=summary_old{ii}(:,[1 6]);
+    meds=summary_old{ii}(:,[1 7]);
+    
+    x=dep{ii,1};
+    y=summary_old{ii};
+    j=ismember(y(:,1),x(:,1));
+    
     TSYNC=5;   time=([fix(med(:,1)*24*60/TSYNC)/24/60*TSYNC,med(:,1)]);
-    med(:,1)= time(:,1);    ref=scan_join(ref,med);
+    med(:,1)= time(:,1);
+    med(:,3)= j;
+    ref=scan_join(ref,med);
 end
 figure; set(gcf,'Tag','ozone');
-ploty(ref,'.'); grid
-legend(gca,Cal.brw_name{Cal.n_ref},'Location','NorthEast','Orientation','Horizontal');
+x=gscatter(ref(:,1),ref(:,2:2:end),ref(:,3:2:end),[],'oxs.'); grid
+legend(x(1:3),Cal.brw_name{Cal.n_ref},'Location','NorthEast','Orientation','Horizontal');
 datetick('x',6,'Keeplimits','Keepticks'); title('DS Ozone'); ylabel('Ozone (DU)');
+
+
+%%
+
+figure; set(gcf,'Tag','ozone ratio');
+x=gscatter(ref(:,1),ref(:,2:2:end)-nanmean(ref(:,2:2:end),2),ref(:,3:2:end),[],'oxs.'); grid
+legend(x(1:3),Cal.brw_name{Cal.n_ref},'Location','NorthEast','Orientation','Horizontal');
+datetick('x',6,'Keeplimits','Keepticks'); 
+title('DS Ozone ratio, removed obs'); ylabel('Ozone (DU)');
+
+
 
 % %% Comparacion Operativa.
 % % close all
