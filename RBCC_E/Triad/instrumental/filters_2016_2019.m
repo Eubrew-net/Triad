@@ -22,13 +22,16 @@ date_start=datenum(2016,1,1);
 date_end=now;
 
 % ----------------------------
-brewers2check=[1 2 3]; % 1->157, 2->183, 3->185 
+brewers2check=[1,2,3]; % 1->157, 2->183, 3->185 
+
+% ----------------------------
+verbose_output=false; % print some more data on the command window
 
 % ----------------------------
 % get the ETC filter corrections from the FIOAVG file
 filters_fioavg_run=true; % run this analysis? true/false
 
-% for report_filter, we will save the figure "FI_TIME_ETC2" from the whole set of figures generated:
+% for filters_fioavg, we will save the figure "FI_TIME_ETC2" from the whole set of figures generated:
 %     in the call to filter_rep:
 %         Attenuation Filter Test, Difference with respect to nominal values -> tag="FI_STATS"
 %         Attenuation Filter Test, Diff. (%) with respect to nominal values [...] -> tag="FIOSTATS_1" (nominal), "FIOSTATS_2" (operative)   
@@ -41,8 +44,7 @@ filters_fioavg_run=true; % run this analysis? true/false
 % get the ETC filter corrections from the ozone measurements
 filters_ozone_run=true; % run this analysis?
 
-% for ozone_filter_analysis_mi, we will save the figures "FILTER_DISTRIBUTION", and "Ozone_diff_filter_rel_comparative" from the whole set:
-% the figs generated are:
+% for filters_ozone, we will save the figures "FILTER_DISTRIBUTION", and "Ozone_diff_filter_rel_comparative" from the whole set:
 %     in the call to ozone_filter_analysis_mi:
 %         percentage of measurements with each filter (pie chart) -> tag="FILTER_DISTRIBUTION"
 %         ozone difference by filter change -> tag="Ozone_diff_filter"
@@ -142,7 +144,7 @@ if filters_fioavg_run
         
         % the brewer to analyze is Cal.brw{Cal.n_inst}
         Cal.n_inst=brw_idx;
-        fprintf(strcat("\n\n**** running filters_fioavg for Brewer #",Cal.brw_str{Cal.n_inst},"\n"))
+        fprintf(strcat("\n\n******** running filters_fioavg for Brewer #",Cal.brw_str{Cal.n_inst},"\n"))
               
         % run report_filter
         
@@ -172,7 +174,7 @@ if filters_fioavg_run
         tabla_fioavg_refF2.events=tabla_fioavg.events;
         tabla_fioavg_refF2.data(:,2:end)=tabla_fioavg_refF2.data(:,2:end)-tabla_fioavg_refF2.data(:,3); % filter 2 is in col 3
         
-        fprintf("** ETC Filter corr, taking as reference the correction to filter #2\n")
+        fprintf("**** ETC Filter corr from FIOAVG, taking as reference the correction to Filter #2\n")
         displaytable(tabla_fioavg_refF2.data(:,2:end), tabla_fioavg_refF2.data_lbl(1:end), 10, '.2f', tabla_fioavg_refF2.events);
         
         % save table as a latex file
@@ -218,7 +220,7 @@ if filters_ozone_run
         
         % the brewer to analyze is Cal.brw{Cal.n_inst}
         Cal.n_inst=brw_idx;
-        fprintf(strcat("\n\n**** running filters_ozone for Brewer #",Cal.brw_str{Cal.n_inst},"\n"))
+        fprintf(strcat("\n\n******** running filters_ozone for Brewer #",Cal.brw_str{Cal.n_inst},"\n"))
    
         %% load and format the data using the aux function load_summ (see the end of this file)
         [summ{brw_idx}, summ_old{brw_idx}]=load_summ(brw_idx, Cal);
@@ -226,12 +228,17 @@ if filters_ozone_run
         %% do the analysis per event
         num_events=length(filter_events{brw_idx}.dates);
         for event_idx=1:num_events
+            fprintf(strcat("**** working on event #",num2str(event_idx),"\n"))
+            
             %% get only the data between this event and the next (or the end of the file, if the last event)
             summ_event{brw_idx}=sliceVarByEvent(summ{brw_idx}, filter_events{brw_idx}.dates, event_idx, num_events);
             summ_old_event{brw_idx}=sliceVarByEvent(summ_old{brw_idx}, filter_events{brw_idx}.dates, event_idx, num_events);
             
             
             %% run ozone_filter_analysis_mi
+            % a max time of 15 minutes between measurements with different filters is the default hardcoded in ozone_filter_analysis_mi
+            % it might be too high, and perhaps it could be better to switch the time threshold to an airmass one, see below
+            fprintf("** No. of filter changes (max time diff between measurements: 15 minutes)")
             rel1=ozone_filter_analysis_mi(summ_event,Cal,Cal.n_inst);
             %rel2=ozone_filter_analysis_mi(summ_old_event,Cal,Cal.n_inst,0);
 
@@ -276,49 +283,66 @@ if filters_ozone_run
             % So if we call ozone_filter_analysis_mi with the ozone multiplied by the airmass and the abs coeff, we will 
             % get the Delta(ETC filter corr)
             %summ_event_mod{brw_idx}(:,6)=summ_event_mod{brw_idx}(:,6).*summ_event_mod{brw_idx}(:,3).*summ_event_mod{brw_idx}(:,16)*10;
-            %[~, abs1]=ozone_filter_analysis_mi_ms9(summ_event_mod, Cal, Cal.n_inst, 0);     
+            %[~, abs1]=ozone_filter_analysis_mi(summ_event_mod, Cal, Cal.n_inst, 0);     
 
             % However, it is also true that Delta(ETC filter corr) = -Delta(MS9), and this seems safer because the MS9
-            % are always free of filter corrections (I think...). In this case, instead of ozone_filter_analysis_mi use 
+            % are always free of filter corrections (I think...). In this case, instead of ozone_filter_analysis_mi, use 
             % ozone_filter_analysis_mi_ms9 to get differences of ms9 (instead of differences of ozone) 
+            %
+            % the _ms9 function also introduces another difference: instead of removing data from filter changes that took
+            % place far apart in time, it removes them if the diff in airmass is larger than some value. in this case, it seems
+            % more natural to use the airmass than the time, because the airmass enters directly in the formula, and indeed
+            % it has been easier to get reasonable results playing with an airmass threshold than with a time one.
+            % to analyze the diffs in time and airmass when the filters are changed, you can use e.g.
+            % [datestr(summ_event_mod{3}(:,1)), string(summ_event_mod{3}(:,3)), string(summ_event_mod{3}(:,5))]
+            fprintf("** No. of filter changes (max airmass diff between measurements: 0.03)")
             [~, abs1]=ozone_filter_analysis_mi_ms9(summ_event_mod, Cal, Cal.n_inst, 0);
+                        
         
-            % filter 0<->1 deltas
-            filter_0_1=cat(1, abs1(:,2), abs1(:,4) ); % ozone_filter_analysis_mi splits the data in 0->1 and 1->0
-            delta_etc_filter_0_1=nanmedian(filter_0_1);
+            % filter 0->1 delta
+            % ozone_filter_analysis_mi splits the data in 0->1 and 1->0, so join it
+            % differences from ozone_filter_analysis_mi are always wrt the lowest filter
+            filter_0_1=cat(1, abs1(:,2), abs1(:,4) );
+            delta_etc_filter_0_1=-nanmedian(filter_0_1);
         
             filter_1_2=cat(1, abs1(:,6), abs1(:,8) ); 
-            delta_etc_filter_1_2=nanmedian(filter_1_2);
+            delta_etc_filter_1_2=-nanmedian(filter_1_2);
         
             filter_2_3=cat(1, abs1(:,10), abs1(:,12) ); 
-            delta_etc_filter_2_3=nanmedian(filter_2_3);
+            delta_etc_filter_2_3=-nanmedian(filter_2_3);
         
             filter_3_4=cat(1, abs1(:,14), abs1(:,16) ); 
-            delta_etc_filter_3_4=nanmedian(filter_3_4);
+            delta_etc_filter_3_4=-nanmedian(filter_3_4);
         
             delta_etc_filter_2_4=delta_etc_filter_2_3+delta_etc_filter_3_4;
             
-            fprintf(strcat("** ETC Filter corrections for event ", num2str(event_idx), "\n"))
-            fprintf(strcat("0->1: ",num2str(delta_etc_filter_0_1),"\n"))
-            fprintf(strcat("1->2: ",num2str(delta_etc_filter_1_2),"\n"))
-            fprintf(strcat("2->3: ",num2str(delta_etc_filter_2_3),"\n"))
-            fprintf(strcat("3->4: ",num2str(delta_etc_filter_3_4),...
-                " 2->4: ", num2str(delta_etc_filter_2_4),"\n"))
+            % output the calculated values now instead of in table later
+            if verbose_output
+                fprintf(strcat("** ETC Filter corrections for event ", num2str(event_idx), "\n"))
+                fprintf(strcat("0->1: ",num2str(delta_etc_filter_0_1),"\n"))
+                fprintf(strcat("1->2: ",num2str(delta_etc_filter_1_2),"\n"))
+                fprintf(strcat("2->3: ",num2str(delta_etc_filter_2_3),"\n"))
+                fprintf(strcat("3->4: ",num2str(delta_etc_filter_3_4),...
+                    " 2->4: ", num2str(delta_etc_filter_2_4),"\n"))
+            end
             
-            % save data of this event to a table, to save it at the end of the events' loop
+            % save data of this event to a table, to save it to a file at the end of the events' loop
             tabla_ozone.data(event_idx,1)=filter_events{brw_idx}.dates(event_idx);
-            tabla_ozone.data(event_idx,2)=NaN; % nothing for filter #1
-            tabla_ozone.data(event_idx,3)=NaN; % nothing for filter #2
+            tabla_ozone.data(event_idx,2)=-delta_etc_filter_1_2; % filter #1 wrt filter #2
+            tabla_ozone.data(event_idx,3)=0; % filter #2 is the reference
             tabla_ozone.data(event_idx,4)=delta_etc_filter_2_3; % filter #3
             tabla_ozone.data(event_idx,5)=delta_etc_filter_2_4; % nothing for filter #4
-            tabla_ozone.data(event_idx,6)=NaN; % nothing for filter #5
+            tabla_ozone.data(event_idx,6)=NaN; % nothing for filter #5 because it is not even considered in the calc!
             
         end % loop over events
         
         % show again the Filter ETC corr per event but this time as a table
+        fprintf("**** ETC Filter corr from ozone measurements, taking as reference the correction to Filter #2\n")
         displaytable(tabla_ozone.data(:,2:end), tabla_ozone.data_lbl, 10, '.2f', tabla_ozone.events);
         
         % save table
+        fprintf(strcat("** saving table to ", Cal.dir_tables, "\n"))
+        
         % make sure file_suffix is a vector of chars or the following line will break!
         table_file=fullfile(Cal.dir_tables, ['table_ETC_FILTER_CORR_OZONE_', Cal.brw_str{Cal.n_inst}, '_', file_suffix, '.tex'] );
         
@@ -364,7 +388,7 @@ if filters_langley_run
             
         % the brewer to analyze is Cal.brw{Cal.n_inst}
         Cal.n_inst=brw_idx;
-        fprintf(strcat("\n\n**** running filters_langley for Brewer #",Cal.brw_str{Cal.n_inst},"\n"))
+        fprintf(strcat("\n\n******** running filters_langley for Brewer #",Cal.brw_str{Cal.n_inst},"\n"))
     
         % initialize output table
         tabla_langley.data=[];
@@ -417,6 +441,7 @@ if filters_langley_run
         %% table & histogram with data per event
         num_events=length(filter_events{brw_idx}.dates);
         for event_idx=1:num_events
+            fprintf(strcat("**** working on event #",num2str(event_idx),"\n"))
             
             % slice by events
             nd0_slice=sliceVarByEvent(nd0, filter_events{brw_idx}.dates, event_idx, num_events);
@@ -436,16 +461,18 @@ if filters_langley_run
             %nd4_etc_corr=round( nanmedian( nd4_slice(:,2) - nd0_slice(:,2) ) , 0);
         
             % print data table
-            fprintf(strcat("** Median of the ETC of each filter over all the Langleys of event ", ...
-                            num2str(event_idx), "\n"))
+            if verbose_output
+                fprintf(strcat("** Median of the ETC of each filter over all the Langleys of event ", ...
+                                num2str(event_idx), "\n"))
                             
-            fprintf(strcat("** ETC for ND #0-1-2 = ", num2str(nd0_etc) ,"\n") )
-            fprintf(strcat("** ETC for ND #3     = ", num2str(nd3_etc) ) )
-            fprintf(strcat(" -> ETC filter correction = ", num2str(nd3_etc_corr), "\n") )
+                fprintf(strcat("** ETC for ND #0-1-2 = ", num2str(nd0_etc) ,"\n") )
+                fprintf(strcat("** ETC for ND #3     = ", num2str(nd3_etc) ) )
+                fprintf(strcat(" -> ETC filter correction = ", num2str(nd3_etc_corr), "\n") )
             
-            if length(nd4_slice(~isnan(nd4_slice(:,2)),2))>2 % nhist requires more than 2 datapoints
-                fprintf(strcat("** ETC for ND #4     = ", num2str(nd4_etc) ) )
-                fprintf(strcat(" -> ETC filter correction = ", num2str(nd4_etc_corr), "\n") )
+                if length(nd4_slice(~isnan(nd4_slice(:,2)),2))>2 % nhist requires more than 2 datapoints
+                    fprintf(strcat("** ETC for ND #4     = ", num2str(nd4_etc) ) )
+                    fprintf(strcat(" -> ETC filter correction = ", num2str(nd4_etc_corr), "\n") )
+                end
             end
             
             % save data of this event to a table, to save it at the end of the events' loop
@@ -482,7 +509,7 @@ if filters_langley_run
 
             set(findobj(gca,'Type','Line'),'Marker','None','LineWidth',2)
 
-            % final touches to fig, depending on the filter 4 data being present or not
+            % final touches to the fig, depending on the filter 4 data being present or not
             if length(nd4_slice(~isnan(nd4_slice(:,2)),2))>2
                 legend({'ND#0,1,2','ND#3', 'ND#4'}, 'Location', 'Best', 'Orientation', 'Vertical');
                 vline_bottom([nd0_etc nd3_etc nd4_etc], '--k', ...
@@ -491,18 +518,19 @@ if filters_langley_run
                 legend({'ND#0,1,2','ND#3'}, 'Location', 'Best', 'Orientation', 'Vertical');
                 vline_bottom([nd0_etc nd3_etc], '--k', {num2str(round(nd0_etc,0)), num2str(round(nd3_etc,0))} )
             end       
-            
-            
+                        
         end % loop of events
-        
-        
-        % change the sign of table_langley, to have the same as in table_fioavg
+            
+        %% change the sign of table_langley to have the same as in table_fioavg
         tabla_langley.data(:,2:end)=-tabla_langley.data(:,2:end);
         
         % show again the Filter ETC corr per event but this time as a table
+        fprintf("**** ETC Filter corr from the Langley calculation, taking as reference the ETC of filter group #0,1,2\n")
         displaytable(tabla_langley.data(:,2:end), tabla_langley.data_lbl, 10, '.2f', tabla_langley.events);
         
         % save table
+        fprintf(strcat("** saving table to ", Cal.dir_tables, "\n"))
+        
         % make sure file_suffix is a vector of chars or the following line will break!
         table_file=fullfile(Cal.dir_tables, ['table_ETC_FILTER_CORR_LANGLEY_', Cal.brw_str{Cal.n_inst}, '_', file_suffix, '.tex'] );
         
@@ -519,8 +547,10 @@ if filters_langley_run
         %% Time Series of ETC filter corrections      
         % calc median, standard error of the mean, and std of the ETC filter corrections, for every week of every year
         % (the original code from Langley185.m used the mean instead of the median, but the median is used in the previous section,
-        % so I made the change to get more consistent results) 
-        [m_brw, s_brw, n_brw] = grpstats( [nd0(:,1) nd3(:,2)-nd0(:,2) nd4(:,2)-nd0(:,2)], ...
+        % so I made the change to get more consistent results)
+        
+        % note i'm changing the signs of the differences to get the same as in the FIOAVG and ozone analyses!
+        [m_brw, s_brw, n_brw] = grpstats( [nd0(:,1) -nd3(:,2)+nd0(:,2) -nd4(:,2)+nd0(:,2)], ...
                                           {year(nd0(:,1)) weeknum(nd0(:,1))}, {'mean','sem','std'} );                                      
 
         % uncomment the next two lines to get the ETC (not ETC corr) plot
@@ -578,8 +608,7 @@ if filters_langley_run
             nd4_etc_corr_series=round(median(lmu4_slice(:,3)));
             hline_pos( nd4_etc_corr_series, '--r', num2str(nd4_etc_corr_series), 0.9*(event_idx)/(num_events+1) );
         end
-        
-        
+           
         datetick('x',12,'KeepTicks');
         box on;
         
@@ -931,9 +960,13 @@ end
 
 
 % ---------------------------------
-function [results_rel results_abs]=ozone_filter_analysis_mi_ms9(summary,Cal,n_inst,varargin)
-    % this is the same /CODE/iberonesia/matlab/brewer/ozone/ozone_filter_analysis_mi
-    % but returns differences in MS9 ratios, instead of ozone
+function [results_rel, results_abs]=ozone_filter_analysis_mi_ms9(summary,Cal,n_inst,varargin)
+    % this is mostly the same as /CODE/iberonesia/matlab/brewer/ozone/ozone_filter_analysis_mi
+    % but returns differences of MS9 ratios, instead of ozone, and it's easier to select the
+    % time interval to keep filter changes
+    
+    %max_time_between_two_measurements=10; % this is in minutes
+    max_airmass_between_two_measurements=0.03;
     
     
     %  Analiza el cambio en el ozono durante el cambio de filtros
@@ -946,10 +979,10 @@ function [results_rel results_abs]=ozone_filter_analysis_mi_ms9(summary,Cal,n_in
     %                    para salir en caso de no data
 
     if nargin==2
-     summary=summary{Cal.n_inst};
+        summary=summary{Cal.n_inst};
     else
-     summary=summary{n_inst};
-     Cal.n_inst=n_inst;
+        summary=summary{n_inst};
+        Cal.n_inst=n_inst;
     end
 
     if all(isnan(summary))
@@ -959,17 +992,26 @@ function [results_rel results_abs]=ozone_filter_analysis_mi_ms9(summary,Cal,n_in
 
     aux=sortrows(summary,1); freq_filter=tabulate(aux(:,5));
 
-     cf=diff(aux(:,5));cf=[1;cf];  
-     cf_idx=find(cf);% buscamos el cambio de filtro (no nulos) 
-     aux=aux(cf_idx,:); cf=cf(cf_idx);
-     cf_idx=find(abs(cf)==64);% s�lo filtros consecutivos
+    cf=diff(aux(:,5));cf=[1;cf];  
+    cf_idx=find(cf);% buscamos el cambio de filtro (no nulos) 
+    aux=aux(cf_idx,:); cf=cf(cf_idx);
+    cf_idx=find(abs(cf)==64);% s�lo filtros consecutivos
     %                 indx     primer F#     segundo F#
-     chg_filter=[cf_idx,aux(cf_idx-1,5),aux(cf_idx,5),(aux(cf_idx,1)-aux(cf_idx-1,1))*24*60];
-    % Nos quedamos con medidas que no difieran en m�s de 1/2 hora entre si (
-     chg_filter=chg_filter(chg_filter(:,end)<=15,:);
- 
-     chg_rel=repmat({NaN*ones(fix(size(summary,1)/2),2)},1,8);
-     chg_abs=repmat({NaN*ones(fix(size(summary,1)/2),2)},1,8);
+    
+    %J This is to remove pairs of measurements taking into account the time difference between them
+    %chg_filter=[cf_idx,aux(cf_idx-1,5),aux(cf_idx,5),(aux(cf_idx,1)-aux(cf_idx-1,1))*24*60];
+    
+    %J This is to remove pairs of measurements taking into account the airmass difference between them
+    chg_filter=[cf_idx,aux(cf_idx-1,5),aux(cf_idx,5),(aux(cf_idx,3)-aux(cf_idx-1,3))];
+    
+    %J Keep only data from measurements taken within max_time_between_two_measurements minutes or less
+    %chg_filter=chg_filter(chg_filter(:,end)<=max_time_between_two_measurements,:);
+    
+    %J Keep only data from measurements taken within max_airmass_between_two_measurements airmass or less
+    chg_filter=chg_filter(abs(chg_filter(:,end))<=max_airmass_between_two_measurements,:);   
+    
+    chg_rel=repmat({NaN*ones(fix(size(summary,1)/2),2)},1,8);
+    chg_abs=repmat({NaN*ones(fix(size(summary,1)/2),2)},1,8);
  
     % DEFINICIONES DE CAMBIO. No considero cambios de m�s de un filtro 
     % #0 -> #1 (#1 -> #0), #1 -> #2 (#2 -> #1), #2 -> #3 (#3 -> #2), #3 -> #4 (#4 -> #3) 
@@ -981,20 +1023,20 @@ function [results_rel results_abs]=ozone_filter_analysis_mi_ms9(summary,Cal,n_in
         g=aux(idx,:); primero=g(1:2:end,:);  segundo=g(2:2:end,:); 
         % diff. relativa
         dif_rel=(segundo-primero)*100./primero; dif_rel(:,1)=nanmean([primero(:,1),segundo(:,1)],2);
-        chg_rel{id}(1:size(dif_rel,1),:)=dif_rel(:,[1 9]);
+        chg_rel{id}(1:size(dif_rel,1),:)=dif_rel(:,[1 9]); %J 6->9
         % diff. absoluta
         dif_=segundo-primero; dif_(:,1)=nanmean([primero(:,1),segundo(:,1)],2);
-        chg_abs{id}(1:size(dif_,1),:)=dif_(:,[1 9]);
+        chg_abs{id}(1:size(dif_,1),:)=dif_(:,[1 9]); %J 6->9
 
         % ATRAS 
         idx=chg_filter(chg_filter(:,2)==filt*64 & chg_filter(:,3)==(filt-1)*64,1); idx=sort([idx-1;idx]);
         g=aux(idx,:); primero=g(1:2:end,:);  segundo=g(2:2:end,:); 
         % diff. relativa
         dif_rel=(primero-segundo)*100./segundo; dif_rel(:,1)=nanmean([primero(:,1),segundo(:,1)],2);
-        chg_rel{id+1}(1:size(dif_rel,1),:)=dif_rel(:,[1 9]); 
+        chg_rel{id+1}(1:size(dif_rel,1),:)=dif_rel(:,[1 9]); %J 6->9 
         % diff. absoluta    
         dif_=primero-segundo; dif_(:,1)=nanmean([primero(:,1),segundo(:,1)],2); 
-        chg_abs{id+1}(1:size(dif_,1),:)=dif_(:,[1 9]);
+        chg_abs{id+1}(1:size(dif_,1),:)=dif_(:,[1 9]); %J 6->9
     
         id=id+2;
     end
