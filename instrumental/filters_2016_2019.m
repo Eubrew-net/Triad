@@ -1,31 +1,55 @@
 %% filter analysis
-% this file is CODE/iberonesia/RBCC_E/Triad/instrumental/filters_2016_2019.m
 %
-% auxiliary functions included at the end of this file: 
+% calculate ETC filter corrections using 1) the FIOAVG data, 2) ozone measurements, and 3) output from the langleys
+%
+% 2DO:
+%     in all sections, add number of measurements, plus some stat like mse, std, or ci to the tables
+%     in the filters_ozone sec, add the date range to the titles of the Ozone_diff_filter_rel_comparative figs
+%
+% this file is CODE/iberonesia/RBCC_E/Triad/instrumental/filters_2016_2019.m
+% list of auxiliary functions included at the end: 
 %    handles2save = changeFigures(Cal, figure_tags, fig_xlim, events)
 %    save_figs(Cal, figure_handles, file_suffix, fig_width, fig_height)
 %    [summary, summary_old] = load_summ(brw_idx, Cal)
 %    [config, ozone_ds, ozone_raw] = load_bdata(Cal)
-%    hline_pos
-%
-% 2DO:
-%   
+%    vline_bottom(x,color,label)
+%    hline_pos(y,color,label,position)
+%    sliced_var=sliceVarByEvent(var, event_dates, event_num, total_num_events)
+%    [results_rel, results_abs]=ozone_filter_analysis_mi_ms9(summary,Cal,n_inst,varargin)
 %
 % 201909 JLS, based on code from everybody
 
 
-%% input options
+%% *************
+%  *************
+%  *************
+%
+%  input options
+%
+%  *************
+%  *************
+%  *************
 
 % ----------------------------
-% start and end analysis dates
+% start and end of analyses' dates
 date_start=datenum(2016,1,1);
 date_end=now;
 
 % ----------------------------
-brewers2check=[1,2,3]; % 1->157, 2->183, 3->185 
+% specify which brewers are going to be analyzed using its index
+% the order in the variable Cal.brw defines the index of each brewer, but usually 1->157, 2->183, 3->185
+brewers2check=[1,2,3];
 
 % ----------------------------
-verbose_output=false; % print some more data on the command window
+% events affecting the filters for each brewer
+filter_events{1}.dates=[datenum(2016,1,1)]; 
+filter_events{1}.labels={'2016-1-1'};
+
+filter_events{2}.dates=[datenum(2016,1,1), datenum(2018,3,1)]; 
+filter_events{2}.labels={'2016-1-1', 'Power supply change'};
+
+filter_events{3}.dates=[datenum(2016,1,1),datenum(2017,3,1),datenum(2018,2,4)]; 
+filter_events{3}.labels={'2016-1-1','Filter change #1','Filter change #2'};
 
 % ----------------------------
 % get the ETC filter corrections from the FIOAVG file
@@ -51,7 +75,6 @@ filters_ozone_run=true; % run this analysis?
 %         ozone relative difference by filter change -> tag="Ozone_diff_filter_rel"
 %     after the call to ozone_filter_analysis_mi:
 %         ozone relative difference by filter change, summ_old vs summ -> tag="Ozone_diff_filter_rel_comparative"
-ozone_filter_analysis_mi_figs2save=[];
 
 % ----------------------------
 % get the ETC filter corrections looking at the langleys
@@ -76,7 +99,10 @@ filters_langley_cloud_file=[];
 
 % ----------------------------
 % suffix to append to the filenames of the figures and latex tables
-file_suffix=char("jlsTest"); % NOTE this MUST be a char vector! so either use '...' or char("...")
+file_suffix=char("jlsTest"); % this MUST be a char array! so either use '...' or char("...")
+
+% ----------------------------
+verbose_output=false; % print some more data on the command window
 
 % ----------------------------
 % general fig options
@@ -86,29 +112,17 @@ fig_xlim=[date_start,date_end];
 fig_linewidth=1;
 
 
-%% define filter events for each brewer
-% the order in the variable Cal.brw defines the index of each brewer
-filter_events{1}.dates=[datenum(2016,1,1)]; 
-filter_events{1}.labels={'Original filters'};
-
-filter_events{2}.dates=[datenum(2016,1,1), datenum(2018,3,1)]; 
-filter_events{2}.labels={'Original filters', 'Power supply change'};
-
-filter_events{3}.dates=[datenum(2016,1,1),datenum(2017,3,1),datenum(2018,2,4)]; 
-filter_events{3}.labels={'Original filters','Filter change #1','Filter change #2'};
-
-
-%% **********************************************
-%  **********************************************
-%  **********************************************
+%% *************************************************
+%  *************************************************
+%  *************************************************
 %
-%                code starts here
+%                 code starts here
 %
-%  hopefully, you won't need look past this line!
+%  hopefully, you won't have to look past this line!
 %
-%  **********************************************
-%  **********************************************
-%  **********************************************
+%  *************************************************
+%  *************************************************
+%  *************************************************
 
 
 %% read configs and set paths
@@ -140,7 +154,7 @@ if filters_fioavg_run
         close all;
         
         % initialize table
-        tabla_fioavg_refF2=[];
+        tabla_fioavg{brw_idx}=[];
         
         % the brewer to analyze is Cal.brw{Cal.n_inst}
         Cal.n_inst=brw_idx;
@@ -153,7 +167,7 @@ if filters_fioavg_run
         %filter_events_mod.dates(1)=filter_events_mod.dates(1)-60;       
         %tabla_fi=report_filter(Cal,'grp_custom',filter_events_mod,'date_range',[filter_events_mod.dates(1),now]);
                 
-        tabla_fioavg=report_filter(Cal,'grp_custom',filter_events{brw_idx},'date_range',[filter_events{brw_idx}.dates(1),now]);
+        tabla_fioavg_separate=report_filter(Cal,'grp_custom',filter_events{brw_idx},'date_range',[filter_events{brw_idx}.dates(1),now]);
         
         % use the aux function changeFigures (see the end of this file) to add the brewer id to the figs' tags,
         %+set the x axis, and add the events
@@ -164,18 +178,20 @@ if filters_fioavg_run
         saveFigs(Cal, handles2save, file_suffix, fig_width, fig_height, fig_linewidth);
                     
         % show table with the Filter ETC corr per event
-        fprintf("** ETC Filter corr, all filters by separate\n")
-        displaytable(tabla_fioavg.data(:,2:2:(end-1)), tabla_fioavg.data_lbl(1:2:(end-1)), 10, '.2f', tabla_fioavg.events);
+        if verbose_output
+            fprintf("** ETC Filter corr, all filters by separate\n")
+            displaytable(tabla_fioavg_separate.data(:,2:2:(end-1)), tabla_fioavg_separate.data_lbl(1:2:(end-1)), 10, '.2f', tabla_fioavg_separate.events);
+        end
         
         % table taking as reference filter 2
-        tabla_fioavg_refF2.data(:,1)=tabla_fioavg.data(:,1); % date
-        tabla_fioavg_refF2.data(:,2:6)=tabla_fioavg.data(:,2:2:(end-1)); % filters will be in cols 2-6
-        tabla_fioavg_refF2.data_lbl=tabla_fioavg.data_lbl(1:2:(end-1));
-        tabla_fioavg_refF2.events=tabla_fioavg.events;
-        tabla_fioavg_refF2.data(:,2:end)=tabla_fioavg_refF2.data(:,2:end)-tabla_fioavg_refF2.data(:,3); % filter 2 is in col 3
+        tabla_fioavg{brw_idx}.data(:,1)=tabla_fioavg_separate.data(:,1); % date
+        tabla_fioavg{brw_idx}.data(:,2:6)=tabla_fioavg_separate.data(:,2:2:(end-1)); % filters will be in cols 2-6
+        tabla_fioavg{brw_idx}.data_lbl=tabla_fioavg_separate.data_lbl(1:2:(end-1));
+        tabla_fioavg{brw_idx}.events=tabla_fioavg_separate.events;
+        tabla_fioavg{brw_idx}.data(:,2:end)=tabla_fioavg{brw_idx}.data(:,2:end)-tabla_fioavg{brw_idx}.data(:,3); % filter 2 is in col 3
         
-        fprintf("**** ETC Filter corr from FIOAVG, taking as reference the correction to Filter #2\n")
-        displaytable(tabla_fioavg_refF2.data(:,2:end), tabla_fioavg_refF2.data_lbl(1:end), 10, '.2f', tabla_fioavg_refF2.events);
+        fprintf(strcat("**** B#", Cal.brw_str{Cal.n_inst}," ETC Filter corr from FIOAVG, taking as reference the correction to Filter #2\n"))
+        displaytable(tabla_fioavg{brw_idx}.data(:,2:end), tabla_fioavg{brw_idx}.data_lbl(1:end), 10, '.2f', tabla_fioavg{brw_idx}.events);
         
         % save table as a latex file
         fprintf(strcat("** saving table to ", Cal.dir_tables, "\n"))
@@ -184,11 +200,15 @@ if filters_fioavg_run
         table_file=fullfile(Cal.dir_tables, ['table_ETC_FILTER_CORR_FIOVAG_', Cal.brw_str{Cal.n_inst}, '_', file_suffix, '.tex'] );
         
         % to change rows to cols, add ' to tabla_fi.data(:,2:end), and change columnlabels to rowlabels and viceversa
-        matrix2latex_ctable(tabla_fioavg_refF2.data(:,2:end), table_file, ...
-                            'columnlabels', str2latex(tabla_fioavg_refF2.data_lbl), ...
-                            'rowlabels', str2latex(tabla_fioavg_refF2.events), ...
+        matrix2latex_ctable(tabla_fioavg{brw_idx}.data(:,2:end), table_file, ...
+                            'columnlabels', str2latex(tabla_fioavg{brw_idx}.data_lbl), ...
+                            'rowlabels', str2latex(tabla_fioavg{brw_idx}.events), ...
                             'alignment', 'c');
-                        
+
+        % show table with the events' dates
+        fprintf(strcat("**** B#", Cal.brw_str{Cal.n_inst}," events\n"))
+        displaytable(string(datestr(filter_events{Cal.n_inst}.dates)), {'start date'}, 12, 's', filter_events{Cal.n_inst}.labels)               
+                      
     end % end loop over brewers
      
 end % end filters_fioavg
@@ -214,9 +234,9 @@ if filters_ozone_run
         close all;
         
         % initialize output table
-        tabla_ozone.data=[];
-        tabla_ozone.data_lbl={'F#1 corr', 'F#2 corr', 'F#3 corr', 'F#4 corr', 'F#5 corr'};
-        tabla_ozone.events=filter_events{brw_idx}.labels;
+        tabla_ozone{brw_idx}.data=[];
+        tabla_ozone{brw_idx}.data_lbl={'F#1 corr', 'F#2 corr', 'F#3 corr', 'F#4 corr', 'F#5 corr'};
+        tabla_ozone{brw_idx}.events=filter_events{brw_idx}.labels;
         
         % the brewer to analyze is Cal.brw{Cal.n_inst}
         Cal.n_inst=brw_idx;
@@ -237,7 +257,6 @@ if filters_ozone_run
             
             %% run ozone_filter_analysis_mi
             % a max time of 15 minutes between measurements with different filters is the default hardcoded in ozone_filter_analysis_mi
-            % it might be too high, and perhaps it could be better to switch the time threshold to an airmass one, see below
             fprintf("** No. of filter changes (max time diff between measurements: 15 minutes)")
             rel1=ozone_filter_analysis_mi(summ_event,Cal,Cal.n_inst);
             %rel2=ozone_filter_analysis_mi(summ_old_event,Cal,Cal.n_inst,0);
@@ -285,7 +304,7 @@ if filters_ozone_run
             %summ_event_mod{brw_idx}(:,6)=summ_event_mod{brw_idx}(:,6).*summ_event_mod{brw_idx}(:,3).*summ_event_mod{brw_idx}(:,16)*10;
             %[~, abs1]=ozone_filter_analysis_mi(summ_event_mod, Cal, Cal.n_inst, 0);     
 
-            % However, it is also true that Delta(ETC filter corr) = -Delta(MS9), and this seems safer because the MS9
+            % However, it is also true that Delta(ETC filter corr) = -Delta(MS9) if Delta(mu)<<, and this seems safer because the MS9
             % are always free of filter corrections (I think...). In this case, instead of ozone_filter_analysis_mi, use 
             % ozone_filter_analysis_mi_ms9 to get differences of ms9 (instead of differences of ozone) 
             %
@@ -298,7 +317,6 @@ if filters_ozone_run
             fprintf("** No. of filter changes (max airmass diff between measurements: 0.03)")
             [~, abs1]=ozone_filter_analysis_mi_ms9(summ_event_mod, Cal, Cal.n_inst, 0);
                         
-        
             % filter 0->1 delta
             % ozone_filter_analysis_mi splits the data in 0->1 and 1->0, so join it
             % differences from ozone_filter_analysis_mi are always wrt the lowest filter
@@ -327,18 +345,18 @@ if filters_ozone_run
             end
             
             % save data of this event to a table, to save it to a file at the end of the events' loop
-            tabla_ozone.data(event_idx,1)=filter_events{brw_idx}.dates(event_idx);
-            tabla_ozone.data(event_idx,2)=-delta_etc_filter_1_2; % filter #1 wrt filter #2
-            tabla_ozone.data(event_idx,3)=0; % filter #2 is the reference
-            tabla_ozone.data(event_idx,4)=delta_etc_filter_2_3; % filter #3
-            tabla_ozone.data(event_idx,5)=delta_etc_filter_2_4; % nothing for filter #4
-            tabla_ozone.data(event_idx,6)=NaN; % nothing for filter #5 because it is not even considered in the calc!
+            tabla_ozone{brw_idx}.data(event_idx,1)=filter_events{brw_idx}.dates(event_idx);
+            tabla_ozone{brw_idx}.data(event_idx,2)=-delta_etc_filter_1_2; % filter #1 wrt filter #2
+            tabla_ozone{brw_idx}.data(event_idx,3)=0; % filter #2 is the reference
+            tabla_ozone{brw_idx}.data(event_idx,4)=delta_etc_filter_2_3; % filter #3
+            tabla_ozone{brw_idx}.data(event_idx,5)=delta_etc_filter_2_4; % nothing for filter #4
+            tabla_ozone{brw_idx}.data(event_idx,6)=-999; % nothing for filter #5 because it is not even considered in the calc!
             
         end % loop over events
         
-        % show again the Filter ETC corr per event but this time as a table
-        fprintf("**** ETC Filter corr from ozone measurements, taking as reference the correction to Filter #2\n")
-        displaytable(tabla_ozone.data(:,2:end), tabla_ozone.data_lbl, 10, '.2f', tabla_ozone.events);
+        % show the Filter ETC corr per event as a table
+        fprintf(strcat("**** B#", Cal.brw_str{Cal.n_inst}," ETC Filter corr from ozone measurements, taking as reference the correction to Filter #2\n"))
+        displaytable(tabla_ozone{brw_idx}.data(:,2:end), tabla_ozone{brw_idx}.data_lbl, 10, '.2f', tabla_ozone{brw_idx}.events);
         
         % save table
         fprintf(strcat("** saving table to ", Cal.dir_tables, "\n"))
@@ -346,10 +364,14 @@ if filters_ozone_run
         % make sure file_suffix is a vector of chars or the following line will break!
         table_file=fullfile(Cal.dir_tables, ['table_ETC_FILTER_CORR_OZONE_', Cal.brw_str{Cal.n_inst}, '_', file_suffix, '.tex'] );
         
-        matrix2latex_ctable(tabla_ozone.data(:,2:end), table_file, ...
-                        'columnlabels', str2latex(tabla_ozone.data_lbl), ...
-                        'rowlabels', str2latex(tabla_ozone.events), ...
+        matrix2latex_ctable(tabla_ozone{brw_idx}.data(:,2:end), table_file, ...
+                        'columnlabels', str2latex(tabla_ozone{brw_idx}.data_lbl), ...
+                        'rowlabels', str2latex(tabla_ozone{brw_idx}.events), ...
                         'alignment', 'c');
+                    
+        % show table with the events' dates
+        fprintf(strcat("**** B#", Cal.brw_str{Cal.n_inst}," events\n"))
+        displaytable(string(datestr(filter_events{Cal.n_inst}.dates)), {'start date'}, 12, 's', filter_events{Cal.n_inst}.labels)
                     
          % use the aux function changeFigures (see the end of this file) to add the brewer id to the figs' tags
          handles2save=changeFigures(Cal, ["FILTER_DISTRIBUTION_event_","Ozone_diff_filter_rel_comparative_event_"], [], []);
@@ -391,9 +413,9 @@ if filters_langley_run
         fprintf(strcat("\n\n******** running filters_langley for Brewer #",Cal.brw_str{Cal.n_inst},"\n"))
     
         % initialize output table
-        tabla_langley.data=[];
-        tabla_langley.data_lbl={'F#1 corr', 'F#2 corr', 'F#3 corr', 'F#4 corr', 'F#5 corr'};
-        tabla_langley.events=filter_events{brw_idx}.labels;
+        tabla_langley{brw_idx}.data=[];
+        tabla_langley{brw_idx}.data_lbl={'F#1 corr', 'F#2 corr', 'F#3 corr', 'F#4 corr', 'F#5 corr'};
+        tabla_langley{brw_idx}.events=filter_events{brw_idx}.labels;
         
         %% do the langley calculation including the filter data
         % format input data
@@ -465,27 +487,27 @@ if filters_langley_run
                 fprintf(strcat("** Median of the ETC of each filter over all the Langleys of event ", ...
                                 num2str(event_idx), "\n"))
                             
-                fprintf(strcat("** ETC for ND #0-1-2 = ", num2str(nd0_etc) ,"\n") )
-                fprintf(strcat("** ETC for ND #3     = ", num2str(nd3_etc) ) )
+                fprintf(strcat("** ETC for F #0,1,2 = ", num2str(nd0_etc) ,"\n") )
+                fprintf(strcat("** ETC for F #3     = ", num2str(nd3_etc) ) )
                 fprintf(strcat(" -> ETC filter correction = ", num2str(nd3_etc_corr), "\n") )
             
                 if length(nd4_slice(~isnan(nd4_slice(:,2)),2))>2 % nhist requires more than 2 datapoints
-                    fprintf(strcat("** ETC for ND #4     = ", num2str(nd4_etc) ) )
+                    fprintf(strcat("** ETC for F #4     = ", num2str(nd4_etc) ) )
                     fprintf(strcat(" -> ETC filter correction = ", num2str(nd4_etc_corr), "\n") )
                 end
             end
             
-            % save data of this event to a table, to save it at the end of the events' loop
-            tabla_langley.data(event_idx,1)=filter_events{brw_idx}.dates(event_idx);
-            tabla_langley.data(event_idx,2)=NaN; % nothing for filter #1
-            tabla_langley.data(event_idx,3)=NaN; % nothing for filter #2
-            tabla_langley.data(event_idx,4)=nd3_etc_corr; % filter #3
+            % save data of this event to a table, to save it to a file at the end of the events' loop
+            tabla_langley{brw_idx}.data(event_idx,1)=filter_events{brw_idx}.dates(event_idx);
+            tabla_langley{brw_idx}.data(event_idx,2)=-0; % filter #1
+            tabla_langley{brw_idx}.data(event_idx,3)=-0; % filter #2
+            tabla_langley{brw_idx}.data(event_idx,4)=nd3_etc_corr; % filter #3
             if length(nd4_slice(~isnan(nd4_slice(:,2)),2))>2
-                tabla_langley.data(event_idx,5)=nd4_etc_corr; % filter #4
+                tabla_langley{brw_idx}.data(event_idx,5)=nd4_etc_corr; % filter #4
             else
-                tabla_langley.data(event_idx,5)=NaN; % nothing for filter #4
+                tabla_langley{brw_idx}.data(event_idx,5)=NaN; % not enough data for filter #4
             end
-            tabla_langley.data(event_idx,6)=NaN; % nothing for filter #5
+            tabla_langley{brw_idx}.data(event_idx,6)=999; % filter #5 was not even considered
             
             % histogram of ETCs for each filter
             figure; 
@@ -522,11 +544,11 @@ if filters_langley_run
         end % loop of events
             
         %% change the sign of table_langley to have the same as in table_fioavg
-        tabla_langley.data(:,2:end)=-tabla_langley.data(:,2:end);
+        tabla_langley{brw_idx}.data(:,2:end)=-tabla_langley{brw_idx}.data(:,2:end);
         
-        % show again the Filter ETC corr per event but this time as a table
-        fprintf("**** ETC Filter corr from the Langley calculation, taking as reference the ETC of filter group #0,1,2\n")
-        displaytable(tabla_langley.data(:,2:end), tabla_langley.data_lbl, 10, '.2f', tabla_langley.events);
+        % show the Filter ETC corr per event as a table
+        fprintf(strcat("**** B#", Cal.brw_str{Cal.n_inst}," ETC Filter corr from the Langley calculation, taking as reference the ETC of Filter Group 0,1,2\n"))
+        displaytable(tabla_langley{brw_idx}.data(:,2:end), tabla_langley{brw_idx}.data_lbl, 10, '.2f', tabla_langley{brw_idx}.events);
         
         % save table
         fprintf(strcat("** saving table to ", Cal.dir_tables, "\n"))
@@ -534,11 +556,15 @@ if filters_langley_run
         % make sure file_suffix is a vector of chars or the following line will break!
         table_file=fullfile(Cal.dir_tables, ['table_ETC_FILTER_CORR_LANGLEY_', Cal.brw_str{Cal.n_inst}, '_', file_suffix, '.tex'] );
         
-        matrix2latex_ctable(tabla_langley.data(:,2:end), table_file, ...
-                        'columnlabels', str2latex(tabla_langley.data_lbl), ...
-                        'rowlabels', str2latex(tabla_langley.events), ...
+        matrix2latex_ctable(tabla_langley{brw_idx}.data(:,2:end), table_file, ...
+                        'columnlabels', str2latex(tabla_langley{brw_idx}.data_lbl), ...
+                        'rowlabels', str2latex(tabla_langley{brw_idx}.events), ...
                         'alignment', 'c');
          
+        % show table with the events' dates
+        fprintf(strcat("**** B#", Cal.brw_str{Cal.n_inst}," events\n"))
+        displaytable(string(datestr(filter_events{Cal.n_inst}.dates)), {'start date'}, 12, 's', filter_events{Cal.n_inst}.labels)               
+                   
         % save figs
         handles2save=changeFigures(Cal, "ETC_FILTER_HISTOGRAM_event_", [], []);
         
@@ -551,7 +577,7 @@ if filters_langley_run
         
         % note i'm changing the signs of the differences to get the same as in the FIOAVG and ozone analyses!
         [m_brw, s_brw, n_brw] = grpstats( [nd0(:,1) -nd3(:,2)+nd0(:,2) -nd4(:,2)+nd0(:,2)], ...
-                                          {year(nd0(:,1)) weeknum(nd0(:,1))}, {'mean','sem','std'} );                                      
+                                          {year(nd0(:,1)) weeknum(nd0(:,1))}, {'median','sem','std'} );                                      
 
         % uncomment the next two lines to get the ETC (not ETC corr) plot
         %[m_brw, s_brw, n_brw] = grpstats( [nd0(:,1) nd3(:,2) nd4(:,2)], ...
@@ -631,6 +657,39 @@ if filters_langley_run
     end % loop over brewers
 
 end % filters_langley
+
+
+%% ********************************************
+%  ********************************************
+%
+%  final summary: show all data tables together
+%
+%  ********************************************
+%  ********************************************
+
+if filters_fioavg_run && filters_ozone_run && filters_langley_run
+    fprintf ("\n\n******** showing all tables with the ETC filter corrections\n")
+
+    for brw_idx=brewers2check
+        fprintf("\n")
+        fprintf(strcat("**** B#", Cal.brw_str{brw_idx}," events\n"))
+        displaytable(string(datestr(filter_events{brw_idx}.dates)), {'start date'}, 12, 's', filter_events{brw_idx}.labels)
+        
+        fprintf("\n")
+        fprintf(strcat("**** B#", Cal.brw_str{brw_idx}," ETC Filter corr from FIOAVG, taking as reference the correction to Filter #2\n"))
+        displaytable(tabla_fioavg{brw_idx}.data(:,2:end), tabla_fioavg{brw_idx}.data_lbl(1:end), 10, '.2f', tabla_fioavg{brw_idx}.events);
+        
+        fprintf("\n")
+        fprintf(strcat("**** B#", Cal.brw_str{brw_idx}," ETC Filter corr from ozone measurements, taking as reference the correction to Filter #2\n"))
+        displaytable(tabla_ozone{brw_idx}.data(:,2:end), tabla_ozone{brw_idx}.data_lbl, 10, '.2f', tabla_ozone{brw_idx}.events);
+        
+        fprintf("\n")
+        fprintf(strcat("**** B#", Cal.brw_str{brw_idx}," ETC Filter corr from the Langley calculation, taking as reference the ETC of Filter Group 0,1,2\n"))
+        displaytable(tabla_langley{brw_idx}.data(:,2:end), tabla_langley{brw_idx}.data_lbl, 10, '.2f', tabla_langley{brw_idx}.events);
+
+        fprintf("\n\n")
+    end
+end
 
 
 %% ********************************************************************************
@@ -962,10 +1021,10 @@ end
 % ---------------------------------
 function [results_rel, results_abs]=ozone_filter_analysis_mi_ms9(summary,Cal,n_inst,varargin)
     % this is mostly the same as /CODE/iberonesia/matlab/brewer/ozone/ozone_filter_analysis_mi
-    % but returns differences of MS9 ratios, instead of ozone, and it's easier to select the
-    % time interval to keep filter changes
+    % but returns differences of MS9 ratios (instead of ozone), and removes pairs of data based
+    % on their difference of airmasses (instead of elapsed time)
     
-    %max_time_between_two_measurements=10; % this is in minutes
+    %max_time_between_two_measurements=15; % this is in minutes
     max_airmass_between_two_measurements=0.03;
     
     
