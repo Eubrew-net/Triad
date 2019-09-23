@@ -1,6 +1,6 @@
 %% filter analysis
 %
-% calculate ETC filter corrections using 1) the FIOAVG data, 2) ozone measurements, and 3) output from the langleys
+% calculate ETC filter corrections using 1) the FIOAVG data, 2) ozone measurements, and 3) output from the Langleys
 %
 % 2DO:
 %     in all sections, add number of measurements, plus some stat like mse, std, or ci to the tables
@@ -130,7 +130,7 @@ fig_linewidth=1;
 %
 %                 code starts here
 %
-%  hopefully, you won't have to look past this line!
+%  hopefully, you won't have to read past this line!
 %
 %  *************************************************
 %  *************************************************
@@ -242,7 +242,7 @@ if filters_ozone_run
     summ_old=cell(length(Cal.n_ref),1);
     
     %% loop over all the brewers
-    for brw_idx=brewers2check %Cal.n_ref
+    for brw_idx=brewers2check
         close all;
         
         % initialize output table
@@ -265,15 +265,13 @@ if filters_ozone_run
             %% get only the data between this event and the next (or the end of the file, if the last event)
             summ_event{brw_idx}=sliceVarByEvent(summ{brw_idx}, filter_events{brw_idx}.dates, event_idx, num_events);
             summ_old_event{brw_idx}=sliceVarByEvent(summ_old{brw_idx}, filter_events{brw_idx}.dates, event_idx, num_events);
-            
-            
+                   
             %% run ozone_filter_analysis_mi
             % a max time of 15 minutes between measurements with different filters is the default hardcoded in ozone_filter_analysis_mi
             fprintf("** No. of filter changes (max time diff between measurements: 15 minutes)")
             rel1=ozone_filter_analysis_mi(summ_event,Cal,Cal.n_inst);
             %rel2=ozone_filter_analysis_mi(summ_old_event,Cal,Cal.n_inst,0);
 
-            
             %% change the tag and title of the FILTER_DISTRIBUTION fig just generated to add the event number and date period
             h=findobj('Tag','FILTER_DISTRIBUTION');
             set(h,'Tag',strcat('FILTER_DISTRIBUTION_event_',num2str(event_idx)));
@@ -282,6 +280,7 @@ if filters_ozone_run
                 datestr(summ_event{brw_idx}(1,1),29), datestr(summ_event{brw_idx}(end,1),29) ));
             
             hold off
+            
             %% plot relative ozone differences when filters are changed 
             % (code stolen from CODE/iberonesia/RBCC_E/2019/Triad/Langley/ozone/Langley157.m)
             f=figure;  
@@ -309,29 +308,30 @@ if filters_ozone_run
             % I guess only summ (and not both summ and summ_old) have to be checked?
             summ_event_mod=summ_event;
             
-            % Delta(ETC filter corr) = -mu*alpha*Delta(ozone) if the ozone has been calculated without the filter
-            % correction (otherwise, Delta(ozone) should be zero!)
-            % So if we call ozone_filter_analysis_mi with the ozone multiplied by the airmass and the abs coeff, we will 
-            % get the Delta(ETC filter corr)
+            % For two measurements with Delta(mu)<<, Delta(ETC_filter_corr) = mu*alpha*Delta(ozone_no_ETC_filter_corr), where 
+            % ozone_no_ETC_filter_corr includes all corrections except the ETC filter one
+            % So if we call ozone_filter_analysis_mi with the ozone multiplied by the airmass and the abs coeff (mutplied by 10, because
+            % the stored abs coeff is missing that factor), we will get Delta(ETC_filter_corr)
             %summ_event_mod{brw_idx}(:,6)=summ_event_mod{brw_idx}(:,6).*summ_event_mod{brw_idx}(:,3).*summ_event_mod{brw_idx}(:,16)*10;
             %[~, abs1]=ozone_filter_analysis_mi(summ_event_mod, Cal, Cal.n_inst, 0);     
 
-            % However, it is also true that Delta(ETC filter corr) = -Delta(MS9) if Delta(mu)<<, and this seems safer because the MS9
-            % are always free of filter corrections (I think...). In this case, instead of ozone_filter_analysis_mi, use 
-            % ozone_filter_analysis_mi_ms9 to get differences of ms9 (instead of differences of ozone) 
+            % However, Delta(ozone_no_ETC_filter_corr) = Delta(MS9)/(mu*alpha), so Delta(ETC_filter_corr) = Delta(MS9), and this
+            % calculation seems safer because for the ozone I need to know whether the ETC filter correction has been included
+            % or not, but that's not the case with the ms9. To use this formula, instead of ozone_filter_analysis_mi (which 
+            % returns ozono differences), use ozone_filter_analysis_mi_ms9 (to get differences of ms9)
             %
-            % the _ms9 function also introduces another difference: instead of removing data from filter changes that took
-            % place far apart in time, it removes them if the diff in airmass is larger than some value. in this case, it seems
-            % more natural to use the airmass than the time, because the airmass enters directly in the formula, and indeed
-            % it has been easier to get reasonable results playing with an airmass threshold than with a time one.
-            % to analyze the diffs in time and airmass when the filters are changed, you can use e.g.
+            % The _ms9 function also introduces another difference: instead of removing data from filter changes that took
+            % place far apart in time, it removes them if the diff in airmasses is larger than some value. For this calculation, 
+            % it seems more natural to use the airmass than the time, because the airmass enters directly in the formula, and
+            % indeed it has been easier to get reasonable results playing with an airmass threshold than with a time one.
+            % You can check the diffs in time and airmass at filter changes with e.g.
             % [datestr(summ_event_mod{3}(:,1)), string(summ_event_mod{3}(:,3)), string(summ_event_mod{3}(:,5))]
             fprintf("** No. of filter changes (max airmass diff between measurements: 0.03)")
             [~, abs1]=ozone_filter_analysis_mi_ms9(summ_event_mod, Cal, Cal.n_inst, 0);
                         
             % filter 0->1 delta
             % ozone_filter_analysis_mi splits the data in 0->1 and 1->0, so join it
-            % differences from ozone_filter_analysis_mi are always wrt the lowest filter
+            % differences from ozone_filter_analysis_mi are always wrt the lowest filter, so there is no need to adjust the signs
             filter_0_1=cat(1, abs1(:,2), abs1(:,4) );
             delta_etc_filter_0_1=-nanmedian(filter_0_1);
         
@@ -793,6 +793,8 @@ function [summary, summary_old]=load_summ(summ_file_folder, summ_file_prefix, br
     %+(or is it CODE/iberonesia/RBCC_E/Triad/Langley/load_data.m?)
     % note also that CODE/iberonesia/RBCC_E/Triad/Langley/read_summaies_2016_2019.m seems to generate yearly txt files in the yearly dirs
     
+    % perhaps this could be less messy if a template was used as input and parts of it were substituted using strrep(template,var,brw_idx)
+    
     summ_data=cell(2,1);
     
     for summ_idx=1:2
@@ -1013,7 +1015,7 @@ end
 
 % -------------------------------
 function slice=sliceVarByEvent(var, event_dates, event_num, total_num_events)
-    % slice (subset) a variable according to a set of events
+    % slice/subset a variable according to a set of events
 
     if event_num ~= total_num_events
         slice_ini=var(:,1)>=event_dates(event_num);
