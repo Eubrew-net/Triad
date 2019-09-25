@@ -10,7 +10,7 @@ Cal.Date.day0=datenum(2015,6,1);
 Cal.Date.dayend=now; % to K&Z calibration
 Date.CALC_DAYS=Cal.Date.day0:Cal.Date.dayend; Cal.Date=Date;
 
-Cal.file_save  = 'triad_2016_19.mat';
+Cal.file_save  = 'triad_2016_19';
 Cal.file_latex = fullfile('..','latex'); 
 Cal.dir_tables = fullfile('..','latex','tables')
 mkdir(Cal.file_latex);
@@ -27,7 +27,7 @@ end
 
 %%
 
-%% READ Brewer Summaries
+% READ Brewer Summaries
 Cal.n_ref=Cal.n_ref;
  for i=1:Cal.n_brw
     ozone_raw{i}={};   hg{i}={};   ozone_sum{i}={};  ozone_raw0{i}={};
@@ -100,62 +100,62 @@ for i=Cal.n_ref
     
 end
 
-% %% SL Report
-% close all;
-% for ii=Cal.n_ref
-%     
-%     sl_mov_o{ii}={}; sl_median_o{ii}={}; sl_out_o{ii}={}; R6_o{ii}={};
-%     sl_mov_n{ii}={}; sl_median_n{ii}={}; sl_out_n{ii}={}; R6_n{ii}={};
-%     % old instrumental constants
-%     [sl_mov_o{ii},sl_median_o{ii},sl_out_o{ii},R6_o{ii}]=sl_report_jday(ii,sl,Cal.brw_str,...
-%                                'outlier_flag',1,'diaj_flag',0,'events_raw',events_raw{ii},...
-%                                'hgflag',1,'fplot',1);
-%     % Imprimimos valores por eventos
-%     fprintf('SL means, Op. config (by events). Brewer %s\r\n',Cal.brw_name{ii}); Cal.n_inst=ii;
-%     event_info=getevents(Cal,'grp','events'); 
-%     data_tab=meanperiods(sl_median_o{ii}(:,[1 2 4]), event_info);
-%     events_SL{ii}=display_table(cat(2,round(data_tab.m(:,2)),round(data_tab.std(:,2),1),round(data_tab.m(:,3)),round(data_tab.std(:,3),1),data_tab.N(:,1)),...
-%                  {'R6','r6_std','R5','r5_std','N'},15,'.4f',data_tab.evnts);
-%     events_SL{ii}.Date=datetime(datevec(fix(event_info.dates)));
-%     events_SL{ii}.Label=event_info.labels';
-%     movevars(events_SL{ii},'Date','Before','R6');
-%     events_SL{ii}.R6_ref= op_cfg{ii}{16,:}';
-%     movevars(events_SL{ii},'R6_ref','Before','R6')
-%     
-%     
-%     writetable(events_SL{ii},'R6_events.xls','Sheet',Cal.brw_str{ii})
-%     % SL report plots
-%     
-%   
-%      ix=maxf(findobj('Tag','SL_R6_report'));
-%      figure(ix);
-%     
-%      Width=15; Height=7;
-%      str=Cal.brw_str(Cal.n_ref);
-%      axis tight
-%      datetick('x',12,'keeplimits','keepticks');
-%      th=rotateticklabel(gca,45); set(th,'FontSize',9);
-%      set(findobj(gcf,'Type','text'),'FontSize',8); 
-%      set(gca,'XTicklabel','','FontSize',10); xlabel('');
-%      set(findobj(gca,'Marker','.'),'MarkerSize',5);
-%      set(findobj(gca,'Marker','o','-or','Marker','s'),'MarkerSize',4)
-%      set(findobj(gcf,'Tag','legend'),'FontSize',8,'Location','NorthWest','LineWidth',0.3);
-%     
-%      % Config from Operative icf
-%      OP_config=Cal.brw_config_files{ii,1};
-%      events_cfg_op=getcfgs(Cal.Date.CALC_DAYS,OP_config);
-%      idx=group_time(R6_o{ii}(:,1),events_cfg_op.data(1,:));
-%      stairs(gca,R6_o{ii}(logical(idx),1),events_cfg_op.data(17,idx),'-b','LineWidth',3);
-%      set(ix,'Tag',['SL_R6_report_',Cal.brw_str{ii}])
-%      printfiles_report(gcf,Cal.dir_figs,'aux_pattern' ,str(ii),'Width',Width*3,'Height',Height*1.5,'LineMode','Scaled');
-%      snapnow; 
-%    
-%            
-%     disp(ii)
-% end
-% save(Cal.file_save,'-APPEND','sl_mov_o','sl_median_o','sl_out_o','R6_o',...
-%                              'sl_mov_n','sl_median_n','sl_out_n','R6_n');
-%                          
+%% SL Report
+close all;
+for ii=Cal.n_ref
+    
+    sl_mov_o{ii}={}; sl_median_o{ii}={}; sl_out_o{ii}={}; R6_o{ii}={};
+    sl_mov_n{ii}={}; sl_median_n{ii}={}; sl_out_n{ii}={}; R6_n{ii}={};
+    % old instrumental constants
+    [sl_mov_o{ii},sl_median_o{ii},sl_out_o{ii},R6_o{ii}]=sl_report_jday(ii,sl,Cal.brw_str,...
+                               'outlier_flag',1,'diaj_flag',0,'events_raw',events_raw{ii},...
+                               'hgflag',1,'fplot',1);
+    % Imprimimos valores por eventos
+    fprintf('SL means, Op. config (by events). Brewer %s\r\n',Cal.brw_name{ii}); Cal.n_inst=ii;
+    event_info=getevents(Cal,'grp','events'); 
+    data_tab=meanperiods(sl_median_o{ii}(:,[1 2 4]), event_info);
+    events_SL{ii}=display_table(cat(2,round(data_tab.m(:,2)),round(data_tab.std(:,2),1),round(data_tab.m(:,3)),round(data_tab.std(:,3),1),data_tab.N(:,1)),...
+                 {'R6','r6_std','R5','r5_std','N'},15,'.4f',data_tab.evnts);
+    events_SL{ii}.Date=datetime(datevec(fix(event_info.dates)));
+    events_SL{ii}.Label=event_info.labels';
+    movevars(events_SL{ii},'Date','Before','R6');
+    events_SL{ii}.R6_ref= op_cfg{ii}{16,:}';
+    movevars(events_SL{ii},'R6_ref','Before','R6')
+    
+    
+    writetable(events_SL{ii},'R6_events.xls','Sheet',Cal.brw_str{ii})
+    % SL report plots
+    
+  
+     ix=maxf(findobj('Tag','SL_R6_report'));
+     figure(ix);
+    
+     Width=15; Height=7;
+     str=Cal.brw_str(Cal.n_ref);
+     axis tight
+     datetick('x',12,'keeplimits','keepticks');
+     th=rotateticklabel(gca,45); set(th,'FontSize',9);
+     set(findobj(gcf,'Type','text'),'FontSize',8); 
+     set(gca,'XTicklabel','','FontSize',10); xlabel('');
+     set(findobj(gca,'Marker','.'),'MarkerSize',5);
+     set(findobj(gca,'Marker','o','-or','Marker','s'),'MarkerSize',4)
+     set(findobj(gcf,'Tag','legend'),'FontSize',8,'Location','NorthWest','LineWidth',0.3);
+    
+     % Config from Operative icf
+     OP_config=Cal.brw_config_files{ii,1};
+     events_cfg_op=getcfgs(Cal.Date.CALC_DAYS,OP_config);
+     idx=group_time(R6_o{ii}(:,1),events_cfg_op.data(1,:));
+     stairs(gca,R6_o{ii}(logical(idx),1),events_cfg_op.data(17,idx),'-b','LineWidth',3);
+     set(ix,'Tag',['SL_R6_report_',Cal.brw_str{ii}])
+     printfiles_report(gcf,Cal.dir_figs,'aux_pattern' ,str(ii),'Width',Width*3,'Height',Height*1.5,'LineMode','Scaled');
+     snapnow; 
+   
+           
+    disp(ii)
+end
+save(Cal.file_save,'-APPEND','sl_mov_o','sl_median_o','sl_out_o','R6_o',...
+                             'sl_mov_n','sl_median_n','sl_out_n','R6_n');
+                         
 %% Creating Summaries
 close all
 [A,ETC,SL_B,SL_R,F_corr,SL_corr_flag,cfg]=read_cal_config_new(config,Cal,{sl_median_o,sl_median_n});
