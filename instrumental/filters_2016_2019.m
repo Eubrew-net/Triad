@@ -1,22 +1,51 @@
 %% filter analysis
-%
+
 % calculate ETC filter corrections using 1) the FIOAVG data, 2) ozone measurements, and 3) output from the Langleys
+
+% input data required:
+%     to run filters_ozone, you need blacklist-filtered summaries -- as of 2019-09-25, 
+%     CODE/iberonesia/RBCC_E/Triad/Langley/load_data_2016_2019.m produces the correct files
 %
+%     to run filters_langley, you need a .mat file with the variables 'config', 'ozone_ds' , 'ozone_raw'. if you
+%     don't have it, this code can generate it (but it will take a while!)
+%
+% check the options below for further information
+
+% brief note on summaries and configurations: 
+% there are multiple configurations and summaries (calculated with each configuration) in play,
+% CODE/iberonesia/matlab/calibration/read_cal_config_new.m seems to have the longest description of the names used:
+%
+% % INPUT:
+% %  - config: columna 1 % primera configuracion (cuando 2 configs.) o la del fichero B
+% %            columna 2 % segunda configuracion (o unica configuracion)
+% %            columna 3 % configuracion del fichero B
+% % 
+% % OUTPUT:
+% %  - A    : three fields struct: new (2nd config), old (1st config) & b (B config).
+% %          (Cal.Date.CALC_DAYS x length(Cal.brw)+1) matrix. 1st column=date. NaN when no data
+%
+% note that the codes that ultimately do the calcs seem to be CODE/iberonesia/matlab/calibration/btools/read_bdata.m and
+% CODE/iberonesia/matlab/calibration/btools/readb_ds_develop.m, and they also work with multiple configs
+%
+% in short, it looks like we can have the config from the b file (if present, it will be the third), the config in use
+% (second or old), and a config which is being tested (first or new or alt). assuming this is used consistently across
+% all codes, and given that we want to check the config in use, we should use the second, or old, config.
+
 % 2DO:
 %     in all sections, add number of measurements, plus some stat like mse, std, or ci to the tables
 %     in the filters_ozone sec, add the date range to the titles of the Ozone_diff_filter_rel_comparative figs
-%
+
 % this file is CODE/iberonesia/RBCC_E/Triad/instrumental/filters_2016_2019.m
-% list of auxiliary functions included at the end: 
+% list of auxiliary functions included at the end of this file
 %    handles2save = changeFigures(Cal, figure_tags, fig_xlim, events)
 %    save_figs(Cal, figure_handles, file_suffix, fig_width, fig_height)
-%    [summary, summary_old] = load_summ(brw_idx, Cal)
-%    [config, ozone_ds, ozone_raw] = load_bdata(Cal)
+%    summary = load_summ(brw_idx, Cal)
+%    [config, ozone_ds, ozone_raw] = load_bdata(Cal, file2save)
 %    vline_bottom(x,color,label)
 %    hline_pos(y,color,label,position)
 %    sliced_var=sliceVarByEvent(var, event_dates, event_num, total_num_events)
 %    [results_rel, results_abs]=ozone_filter_analysis_mi_ms9(summary,Cal,n_inst,varargin)
-%
+
 % 201909 JLS, based on code from everybody
 
 
@@ -42,8 +71,8 @@ brewers2check=[1,2,3];
 
 % ----------------------------
 % events affecting the filters for each brewer
-filter_events{1}.dates=[datenum(2016,1,1)]; 
-filter_events{1}.labels={'2016-1-1'};
+filter_events{1}.dates=[datenum(2016,1,1)]; %, datenum(2019,5,6), datenum(2019,5,24)]; 
+filter_events{1}.labels={'2016-1-1'}; %, 'Power supply broken', 'Power supply fixed'};
 
 filter_events{2}.dates=[datenum(2016,1,1), datenum(2018,3,1)]; 
 filter_events{2}.labels={'2016-1-1', 'Power supply change'};
@@ -68,16 +97,17 @@ filters_fioavg_run=true; % run this analysis? true/false
 % get the ETC filter corrections from the ozone measurements
 filters_ozone_run=true; % run this analysis?
 
-% data will be loaded from two summaries with filenames defined as prefix + brewer index + suffix,
-% e.g. CODE/iberonesia/RBCC_E/2019/../Triad/Langley/summary_Brw1_20162019.txt
+% data will be loaded from summaries with filenames defined as prefix + brewer id + suffix,
+% e.g. CODE/iberonesia/RBCC_E/2019/../Triad/Langley/summary_Brw157_20162019.txt
 %
-% !!! at this time, only the first summary of each brewer is analyzed !!!
+% note that the summaries must be produced including the blacklist --
+% B#157 in particular will give some ugly results in May 2019 otherwise!
 %
-% prefixes of the summaries' filenames
-filters_fioavg_summ_prefix=["summary_Brw", "summary_old_Brw"]; 
+% prefix
+filters_fioavg_summ_prefix="summary_old_Brw"; 
 % suffix
 filters_fioavg_summ_suffix="_20162019.txt";
-% dir with the summaries, relative to Cal.path_root
+% dir with the summaries, relative to Cal.path_root (usually CODE/iberonesia/RBCC_E/2019/)
 filters_fioavg_summ_dir=fullfile('..','Triad','Langley');
 
 % for filters_ozone, we will save the figures "FILTER_DISTRIBUTION", and "Ozone_diff_filter_rel_comparative" from the whole set:
@@ -95,7 +125,7 @@ filters_langley_run=true; % run this analysis?
 % for the filters_langley analysis, load the config, ozone_ds, and ozone_raw data from the file in filters_langley_data_file?
 % if false, the data will be generated from the B files and saved to filters_langley_data_file
 filters_langley_load_data=true;
-filters_langley_data_file=["filters_2016_2019.mat"];
+filters_langley_data_file="filters_2016_2019.mat";
 
 % for the filters_langley analysis, do an AOD screening using an AERONET file (such as eg CODE/iberonesia/RBCC_E/2019/Triad/BSRN/190101_191231_Izana.lev15)
 % leave empty ([]) for no screening
@@ -111,7 +141,7 @@ filters_langley_cloud_file=[];
 
 % ----------------------------
 % suffix to append to the filenames of the figures and latex tables
-file_suffix=char("jlsTest"); % this MUST be a char array! so either use '...' or char("...")
+file_suffix=char("jlsTest"); % this MUST be a char array! so either use single quotes or char("...")
 
 % ----------------------------
 verbose_output=false; % print some more data on the command window
@@ -144,11 +174,12 @@ fig_linewidth=1;
 run(fullfile('..','read_config_'));
 
 
-%% change date range from the one defined in read_config_ 
+%% change date range and list of brewers to check from the ones defined in read_config_ 
 Cal.Date.day0=date_start;
 Cal.Date.dayend=date_end;
 Date.CALC_DAYS=Cal.Date.day0:Cal.Date.dayend; 
 Cal.Date=Date;
+Cal.n_ref=brewers2check;
 
 
 %% ***************************************************
@@ -237,9 +268,7 @@ end % end filters_fioavg
 if filters_ozone_run
     
     % initialize storage
-    % i'm not sure what's the difference between these two summaries... do I have to check both of them?
     summ=cell(length(Cal.n_ref),1);
-    summ_old=cell(length(Cal.n_ref),1);
     
     %% loop over all the brewers
     for brw_idx=brewers2check
@@ -255,7 +284,7 @@ if filters_ozone_run
         fprintf(strcat("\n\n******** running filters_ozone for Brewer #",Cal.brw_str{Cal.n_inst},"\n"))
    
         %% load and format the data using the aux function load_summ (see the end of this file)
-        [summ{brw_idx}, summ_old{brw_idx}]=load_summ(filters_fioavg_summ_dir, filters_fioavg_summ_prefix, brw_idx, filters_fioavg_summ_suffix, Cal);
+        summ{brw_idx}=load_summ(filters_fioavg_summ_dir, filters_fioavg_summ_prefix, brw_idx, filters_fioavg_summ_suffix, Cal);
         
         %% do the analysis per event
         num_events=length(filter_events{brw_idx}.dates);
@@ -264,13 +293,11 @@ if filters_ozone_run
             
             %% get only the data between this event and the next (or the end of the file, if the last event)
             summ_event{brw_idx}=sliceVarByEvent(summ{brw_idx}, filter_events{brw_idx}.dates, event_idx, num_events);
-            summ_old_event{brw_idx}=sliceVarByEvent(summ_old{brw_idx}, filter_events{brw_idx}.dates, event_idx, num_events);
                    
             %% run ozone_filter_analysis_mi
             % a max time of 15 minutes between measurements with different filters is the default hardcoded in ozone_filter_analysis_mi
             fprintf("** No. of filter changes (max time diff between measurements: 15 minutes)")
             rel1=ozone_filter_analysis_mi(summ_event,Cal,Cal.n_inst);
-            %rel2=ozone_filter_analysis_mi(summ_old_event,Cal,Cal.n_inst,0);
 
             %% change the tag and title of the FILTER_DISTRIBUTION fig just generated to add the event number and date period
             h=findobj('Tag','FILTER_DISTRIBUTION');
@@ -289,7 +316,6 @@ if filters_ozone_run
             p=patch([0.5 8.5 8.5 0.5],[-0.5 -0.5 0.5 0.5],[.93 .93 .93]);
         
             h1=boxplotCsub(rel1(:,2:2:end),1,'o',1,1,'g',true,1,true,[1 1],1.5,0.005,false);
-            %h2=boxplotCsub(rel2(:,2:2:end),1,'*',1,1,'r',true,1,true,[1 1],1.25,0.05,false);
         
             %set(gca,'YLim',[-2 2],'XTickLabel',{'0-64','64-0','64-128','128-64','128-192','192-128','192-256','256-192'});
             set(gca,'YLim',[-2 2],'XTickLabel',{'0-1','1-0','1-2','2-1','2-3','3-2','3-4','4-3'});
@@ -301,8 +327,7 @@ if filters_ozone_run
         
             title(sprintf('Ozone Relative differences by filter chg. %s\r\n Referenced always to lower filter for each group',Cal.brw_name{Cal.n_inst}));
         
-            %legend([h1(end,1),h2(end,1)],{'summ','summ\_old'},'Location','SouthWest','Orientation','Horizontal');
-            legend([h1(end,1)],{'summ'},'Location','SouthWest','Orientation','Horizontal');
+            %legend([h1(end,1)],{'summ'},'Location','SouthWest','Orientation','Horizontal');
           
             %% ETC filter corr from ozone changes
             % I guess only summ (and not both summ and summ_old) have to be checked?
@@ -461,8 +486,8 @@ if filters_langley_run
         brw_indv_ = langley_analys_filter(lgl_filt, Cal.n_inst, ...
                                           'res_filt', 1, 'plot_flag', 0);
 
-        % the previous codes return data for two configs, but we will analyze only the operative (should be no. 1)
-        cfgs=1;      % operative cfg
+        % the previous codes return data for two configs, but we will analyze only the operative (should be no. 2)
+        cfgs=2;      % operative cfg
         
         % format ouput
         nd0_ = cat(1, brw_indv_(:, [1 2], cfgs), brw_indv_(:, [1 6], cfgs) ); 
@@ -787,32 +812,24 @@ function saveFigs(Cal, figure_handles, file_suffix, fig_width, fig_height, fig_l
 end
 
 % -----------------------------
-function [summary, summary_old]=load_summ(summ_file_folder, summ_file_prefix, brw_idx, summ_file_suffix, Cal)
-    % load the summaries from files such as CODE/iberonesia/RBCC_E/Triad/Langley/summary_Brw1_20162019.txt
-    % note these files are generated by CODE/iberonesia/RBCC_E/Triad/Langley/load_data_2016_2019.m 
-    %+(or is it CODE/iberonesia/RBCC_E/Triad/Langley/load_data.m?)
+function summary=load_summ(summ_file_folder, summ_file_prefix, brw_idx, summ_file_suffix, Cal)
+    % load the summaries from files such as CODE/iberonesia/RBCC_E/Triad/Langley/summary_Brw157_20162019.txt
+    % note these files are generated by CODE/iberonesia/RBCC_E/Triad/Langley/load_data_2016_2019.m
     % note also that CODE/iberonesia/RBCC_E/Triad/Langley/read_summaies_2016_2019.m seems to generate yearly txt files in the yearly dirs
     
     % perhaps this could be less messy if a template was used as input and parts of it were substituted using strrep(template,var,brw_idx)
-    
-    summ_data=cell(2,1);
-    
-    for summ_idx=1:2
-        summ_table=strcat( summ_file_prefix(summ_idx), string(brw_idx), summ_file_suffix);
-        summ_table=fullfile(Cal.path_root, summ_file_folder, summ_table);
+      
+    summ_table=strcat( summ_file_prefix, Cal.brw_str{brw_idx}, summ_file_suffix);
+    summ_table=fullfile(Cal.path_root, summ_file_folder, summ_table);
         
-        fprintf(strcat("** loading data from summary file ", summ_table,"\n") )
+    fprintf(strcat("** loading data from summary file ", summ_table,"\n") )
         
-        summ_table=readtable(summ_table);
+    summ_table=readtable(summ_table);
         
-        summ_data{summ_idx}=[summ_table.x_Date, summ_table.sza, summ_table.m2, summ_table.temp, summ_table.nd, ...
-                             summ_table.O3_1, summ_table.std, summ_table.ms9_corr, summ_table.ms9, summ_table.O3_2, ...
-                             summ_table.std, summ_table.O3_1_sl, summ_table.std, summ_table.R6_ref, ...
-                             summ_table.R6_calc, summ_table.A1, summ_table.ETC];
-    end
-    
-    summary=summ_data{1};
-    summary_old=summ_data{2};    
+    summary=[summ_table.x_Date, summ_table.sza, summ_table.m2, summ_table.temp, summ_table.nd, ...
+             summ_table.O3_1, summ_table.std, summ_table.ms9_corr, summ_table.ms9, summ_table.O3_2, ...
+             summ_table.std, summ_table.O3_1_sl, summ_table.std, summ_table.R6_ref, ...
+             summ_table.R6_calc, summ_table.A1, summ_table.ETC];
 end
 
 % -----------------------------
@@ -821,7 +838,7 @@ function [config, ozone_ds, ozone_raw]=load_bdata(Cal, file2save)
     % adapted from section "READ Brewer Summaries" in CODE/iberonesia/RBCC_E/Triad/Langley/load_data.m
     
     for brw_idx=Cal.n_ref
-        fprintf(strcat("** loading B files from Brewer #", Cal.brw_str{Cal.n_inst},"\n"))
+        fprintf(strcat("** loading B files from Brewer #", Cal.brw_str{brw_idx},"\n"))
         %ozone_sum{i}={};
         config{brw_idx}={};
         ozone_ds{brw_idx}={}; 
