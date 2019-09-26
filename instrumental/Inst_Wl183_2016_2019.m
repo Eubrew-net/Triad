@@ -258,15 +258,22 @@ matrix2latex_ctable(tabla_avg.data(:,2:end)',fullfile(Cal.dir_tables,['table_avg
 %% Temperature dependence
 
 close all; 
- 
-t.dates=[datenum(2015,6,1),datenum(2017,12,10),datenum(2018,05,12)];
-t.labels=[{'start','hv','SL chg'}];
+
+% 
+%t.dates=[datenum(2015,6,1),datenum(2017,12,10),datenum(2018,05,12)];
+%t.labels=[{'start','hv','SL chg'}];
+
+t.dates=[datenum(2015,6,9),datenum(2016,7,13),datenum(2017,3,6),datenum(2017,12,10),datenum(2018,01,14),datenum(2018,05,12)];
+t.labels=[{'ios','SL chg','KandZ','hv','hv chg','SL chg'}];
+
 %t.dates=[datenum(2019,1,1)];
 %t.labels=[{'2019'}];
 %  Hay que mirar si hay cambios en la intensidad de la lampara ->
 %  
- 
-[tabla_tc,sl_raw_183]=report_temperature(Cal,OP_config,OP_config,'grp_custom',t,'reprocess',1);
+
+[tabla_tc,sl_raw_183]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t,'reprocess',0);
+
+%[tabla_tc,sl_raw_183]=report_temperature(Cal,OP_config,OP_config,'grp_custom',t,'reprocess',1);
 %[tabla_tc,sl_raw_183]=report_temperature(Cal,OP_config,ALT_config,'grp','events','reprocess',0)
 %% Global temperature
 sl=cat(1,tabla_tc.sl{:});
@@ -319,6 +326,35 @@ nanmean(tabla_tc.sl{1})
 nanmean(tabla_tc.sl_r{1})
 
 % SL reference 371
+
+%% Calculo por semana (para correrlo cambiar false a true )
+close all
+
+if false
+    
+[tabla_tc_week,sl_raw_183_week]=report_temperature(Cal,OP_config,ALT_config,'grp','week','reprocess',0);
+close all
+
+f=figure
+set(f,'Tag',['TC_WEEK_',Cal.brw_name{Cal.n_inst}]);
+plot(tabla_tc_week.data(:,1),tabla_tc_week.data(:,10),'.');
+vline_v(t.dates,'k',t.labels);
+datetick('x',1,'KeepTicks','KeepLimits');
+hold on;
+plot(tabla_tc.data(:,1),tabla_tc.data(:,10),'-o');
+title(['Week and event TC comparison for Brewer#', Cal.brw_str{Cal.n_inst}]);
+ylabel('Residual Temperature effect after temperature correction');
+xlabel('Date');
+hline(nanmedian(tabla_tc_week.data(:,10)),':b',num2str(nanmedian(tabla_tc_week.data(:,10))));
+hline(nanmedian(tabla_tc.data(:,10)),':r',num2str(nanmedian(tabla_tc.data(:,10))));
+nanmedian(tabla_tc_week.data(:,10));
+nanmedian(tabla_tc.data(:,10));
+
+printfiles_report(f,Cal.dir_figs,'Width',Width,'Height',Height);
+close all
+
+end
+
                                 
 %% dark evaluation
 figure

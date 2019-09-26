@@ -384,7 +384,33 @@ nanmean(tabla_tc.sl_r{1})
 % title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]);
 % ylabel('Standard Lamp R6 ratio'); xlabel('Temperature'); set(gca,'Box','On');
 
+%% Calculo por semana (para correrlo cambiar false a true )
+close all
 
+if false
+    
+[tabla_tc_week,sl_raw_183_week]=report_temperature(Cal,OP_config,ALT_config,'grp','week','reprocess',0);
+close all
+
+f=figure
+set(f,'Tag',['TC_WEEK_',Cal.brw_name{Cal.n_inst}]);
+plot(tabla_tc_week.data(:,1),tabla_tc_week.data(:,10),'.');
+vline_v(t.dates,'k',t.labels);
+datetick('x',1,'KeepTicks','KeepLimits');
+hold on;
+plot(tabla_tc.data(:,1),tabla_tc.data(:,10),'-o');
+title(['Week and event TC comparison for Brewer#', Cal.brw_str{Cal.n_inst}]);
+ylabel('Residual Temperature effect after temperature correction');
+xlabel('Date');
+hline(nanmedian(tabla_tc_week.data(:,10)),':b',num2str(nanmedian(tabla_tc_week.data(:,10))));
+hline(nanmedian(tabla_tc.data(:,10)),':r',num2str(nanmedian(tabla_tc.data(:,10))));
+nanmedian(tabla_tc_week.data(:,10));
+nanmedian(tabla_tc.data(:,10));
+
+printfiles_report(f,Cal.dir_figs,'Width',Width,'Height',Height);
+close all
+
+end
  
 %% dark evaluation
 figure

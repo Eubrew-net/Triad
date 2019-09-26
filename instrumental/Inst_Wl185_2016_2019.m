@@ -270,10 +270,10 @@ t.labels={'IOS','sl_jump','SC','PTB','IZO','KZ','SLnew','HV','HVS','Huelva'};
 %  Hay que mirar si hay cambios en la intensidad de la lampara ->
 %  
  
-[tabla_tc,sl_raw_185]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t,'reprocess',1);
+[tabla_tc,sl_raw_185]=report_temperature(Cal,OP_config,ALT_config,'grp_custom',t,'reprocess',0);
 %[tabla_tc,sl_raw_185]=report_temperature(Cal,OP_config,ALT_config,'grp','events','reprocess',1)
 
-
+                                  
 %%
 [gp,g]=group_time(sl_raw_185,t.dates);
 
@@ -350,6 +350,50 @@ close all
 nanmean(tabla_tc.sl{1})
 nanmean(tabla_tc.sl_r{1})
 
+%% Calculo por semana (para correrlo cambiar false a true )
+close all
+
+if false
+    
+[tabla_tc_week,sl_raw_185_week]=report_temperature(Cal,OP_config,ALT_config,'grp','week','reprocess',0);
+close all
+
+f=figure
+set(f,'Tag',['TC_WEEK_',Cal.brw_name{Cal.n_inst}]);
+plot(tabla_tc_week.data(:,1),tabla_tc_week.data(:,10),'.');
+vline_v(t.dates,'k',t.labels);
+datetick('x',1,'KeepTicks','KeepLimits');
+hold on;
+plot(tabla_tc.data(:,1),tabla_tc.data(:,10),'-o');
+title(['Week and event TC comparison for Brewer#', Cal.brw_str{Cal.n_inst}]);
+ylabel('Residual Temperature effect after temperature correction');
+xlabel('Date');
+hline(nanmedian(tabla_tc_week.data(:,10)),':b',num2str(nanmedian(tabla_tc_week.data(:,10))));
+hline(nanmedian(tabla_tc.data(:,10)),':r',num2str(nanmedian(tabla_tc.data(:,10))));
+nanmedian(tabla_tc_week.data(:,10));
+nanmedian(tabla_tc.data(:,10));
+
+printfiles_report(f,Cal.dir_figs,'Width',Width,'Height',Height);
+close all
+
+end
+
+%% Calculo de coeficientes de temperatura: 
+load([Cal.brw_name{Cal.n_inst},'_sl_rw.mat']);
+config_temp.n_inst=Cal.n_inst; 
+config_temp.brw_name=Cal.brw_name{Cal.n_inst};  
+
+[NTCa,ajuste,Args,Fr]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,...
+                                      'date_range',[datenum(2016,4,10),datenum(2018,2,14)]);
+                                  
+NTCa
+
+[NTCb,ajuste,Args,Fr]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,...
+                                      'date_range',[datenum(2018,3,26),datenum(2019,7,1)]);
+
+NTCb
+
+close all
 % SL reference 371
                                 
 %% dark evaluation
