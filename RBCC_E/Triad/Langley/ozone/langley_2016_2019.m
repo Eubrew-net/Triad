@@ -1,4 +1,5 @@
 clear all
+close all
 % ejecutamos la configuracion
 %run(fullfile(path_root,'..','Triad','read_config_'));
 run(fullfile('..','..','read_config_'));
@@ -25,12 +26,12 @@ s=[];
 ev=cell(3,1);
 
 % 157
-importantes{1}=[1,1,17,20,23];
+importantes{1}=[1,4,16,20,23];
 ev{1}.dates=events{1}.dates(importantes{1});
 ev{1}.labels=events{1}.labels(importantes{1});
-% añadimos ios 2015 (revisar)
-ev{1}.dates(1)=datenum(2015,6,10);
-ev{1}.labels(1)={'IOS_'};
+% añadimos ios 2015
+ev{1}.dates(1)=datenum(2015,6,6);
+ev{1}.labels(1)={'IOS'};
 ev{1}.op_ETC=[op_cfg{1}{8,[importantes{1}]}];
 ev{1}.alt_ETC=[alt_cfg{1}{8,importantes{1}}];
 ev{1}.op_A1=[op_cfg{1}{7,importantes{1}}];
@@ -41,15 +42,22 @@ ev{1}.alt_A1=[alt_cfg{1}{7,importantes{1}}];
 importantes{2}=[1,9,13,15,16];
 ev{2}.dates=events{2}.dates(importantes{2});
 ev{2}.labels=events{2}.labels(importantes{2});
+% añadimos ios 2015
+ev{2}.dates(1)=datenum(2015,6,9);
+ev{2}.labels(1)={'IOS'};
 ev{2}.op_ETC=[op_cfg{2}{8,[importantes{2}]}];
 ev{2}.alt_ETC=[alt_cfg{2}{8,importantes{2}}];
 ev{2}.op_A2=[op_cfg{2}{7,importantes{2}}];
 ev{2}.alt_A2=[alt_cfg{2}{7,importantes{2}}]
 
 % 185
-importantes{3}=[4,7,8,10,14,16,18,19,24,26,28,30,31];
+%importantes{3}=[4,7,8,10,14,16,18,19,24,26,28,30,31];
+importantes{3}=[1,4,8,12,17,20,26,29,32];
 ev{3}.dates=events{3}.dates(importantes{3});
 ev{3}.labels=events{3}.labels(importantes{3});
+% añadimos ios 2015
+ev{3}.dates(1)=datenum(2015,6,10);
+ev{3}.labels(1)={'IOS'};
 ev{3}.op_ETC=[op_cfg{3}{8,[importantes{3}]}];
 ev{3}.alt_ETC=[alt_cfg{3}{8,importantes{3}}];
 ev{3}.op_A3=[op_cfg{3}{7,importantes{3}}];
@@ -130,16 +138,19 @@ for i=1:3
     
     mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,2),60,1);
     hold on
+    plot(lgl_o3{i}(:,1),lgl_o3{i}(:,2),'.')
+    ylim([prctile(lgl_o3{i}(:,2),0.1),prctile(lgl_o3{i}(:,2),99.9)])
     [xx,yy]=stairs(op{i}.UsageDate,[op{i}.ETCOnO3Ratio,alt{i}.ETCOnO3Ratio]);
     h=plot([xx;[now,now]],[yy;yy(end,:)], '-','LineWidth',5);
     legend(h,'op','alt')
     %stairs(alt{i}.UsageDate,alt{i}.ETCOnO3Ratio,'k-','LineWidth',5)
-    vline_v(events{i}.dates,' ',events{i}.labels)
+    %vline_v(events{i}.dates,' ',events{i}.labels)
+    vline_v(ev{i}.dates,' ',str2latex(ev{i}.labels))
     %title(num2str(brewer(i)));
     title([num2str(brewer(i)),'operativa']);
     grid on;
     datetick('x',12,'keeplimits','keepticks')
-    xlim([datenum(2015,12,1),now])
+    %xlim([datenum(2015,12,1),now])
     set(gca,'LooseInset',get(gca,'TightInset'))
     
     
@@ -148,15 +159,18 @@ for i=1:3
     
     mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,4),60,1);
     hold on
+    plot(lgl_o3{i}(:,1),lgl_o3{i}(:,4),'.')
+    ylim([prctile(lgl_o3{i}(:,4),0.1),prctile(lgl_o3{i}(:,4),99.9)])
     [xx,yy]=stairs(op{i}.UsageDate,[op{i}.ETCOnO3Ratio,alt{i}.ETCOnO3Ratio]);
     h=plot([xx;[now,now]],[yy;yy(end,:)], '-','LineWidth',5);
     legend(h,'op','alt')
     %stairs(alt{i}.UsageDate,alt{i}.ETCOnO3Ratio,'k-','LineWidth',5)
-    vline_v(events{i}.dates,' ',events{i}.labels)
+    %vline_v(events{i}.dates,' ',events{i}.labels)
+ 	vline_v(ev{i}.dates,' ',str2latex(ev{i}.labels))
     title([num2str(brewer(i)),' alternativa']);
     grid on;
     datetick('x',12,'keeplimits','keepticks')
-    xlim([datenum(2015,12,1),now])
+    %xlim([datenum(2015,12,1),now])
     set(gca,'LooseInset',get(gca,'TightInset'))
     
     %% summary
