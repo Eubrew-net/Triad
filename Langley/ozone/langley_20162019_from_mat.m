@@ -152,11 +152,35 @@ for i=1:3
     %input.makeCompleteLatexDocument = 0;
     %l=latexTable(input);
     %cellwrite(sprintf('langley_eventos_%03d.tex',brewer(i)),l);
-    
+    %%
     
     %% outputs 
-    figure
+    figure 
+    % lgl_o3
+    %Date etc_1 slope_1  etc_2 slope_2 detc_1 dslope_1  detc_2 dslope_2
+  
+    h1=mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,6),60,0);hold on
+    h2=mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,8),60,0);hold on
+    hold on
+    plot(lgl_o3{i}(:,1),lgl_o3{i}(:,6),'.')
+    plot(lgl_o3{i}(:,1),lgl_o3{i}(:,8),'x')
     
+    ylim([prctile(lgl_o3{i}(:,6),0.1),prctile(lgl_o3{i}(:,6),99.9)])
+    %[xx,yy]=stairs(op{i}.UsageDate,[op{i}.ETCOnO3Ratio,alt{i}.ETCOnO3Ratio]);
+    %h=plot([xx;[now,now]],[yy;yy(end,:)], '-','LineWidth',5);
+    %legend(h,'op','alt')
+    %stairs(alt{i}.UsageDate,alt{i}.ETCOnO3Ratio,'k-','LineWidth',5)
+    %vline_v(events{i}.dates,' ',events{i}.labels)
+    vline_v(ev{i}.dates,' ',str2latex(ev{i}.labels))
+    %title(num2str(brewer(i)));
+    title([num2str(brewer(i)),'operativa']);
+    grid on;
+    datetick('x',12,'keeplimits','keepticks')
+    %xlim([datenum(2015,12,1),now])
+    set(gca,'LooseInset',get(gca,'TightInset'))
+    
+    %% outputs 
+    figure 
     mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,2),60,1);
     hold on
     plot(lgl_o3{i}(:,1),lgl_o3{i}(:,2),'.')
