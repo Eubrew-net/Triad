@@ -7,8 +7,8 @@ run(fullfile('..','read_config_'))
 
 %Cal.Date.day0=datenum(2018,2,1);
 %Cal.Date.dayend=datenum(2018,3,10);
-Cal.Date.day0=datenum(2015,6,1);
-Cal.Date.dayend=datenum(2019,7,1);
+Cal.Date.day0=datenum(2019,7,10);
+Cal.Date.dayend=datenum(2019,7,15);
 Date.CALC_DAYS=Cal.Date.day0:Cal.Date.dayend; Cal.Date=Date;
 
 brewer=[157,183,185];
@@ -65,6 +65,7 @@ end
     rat(i,1)=summary_old{b1}(i,1);
     rat(i,2)=summary_old{b1}(i,4);
     rat(i,3)=summary_old{b1}(i,8);
+    rat(i,15)=summary_old{b1}(i,3);
     rat(i,4)=summary{b1}(i,8);
     % primer ratio
     [m,ri]=min(abs(summary_old{b2}(:,1)-summary_old{b1}(i,1)));
@@ -120,6 +121,8 @@ legend(sprintf("ms9(%d)/ms9(%d)",brewer(b1),brewer(b2)),sprintf("ms9(%d)/ms9(%d)
 % set(gca, 'XTickMode', 'auto', 'XTickLabelMode', 'auto')
 datetick('x',1,'keeplimits','keepticks')
 title(sprintf("ms9 ratios %d, %d and %d Op. (%s,%s)",brewer(b1),brewer(b2),brewer(b3),datestr(Date.CALC_DAYS(1)),datestr(Date.CALC_DAYS(end))));
+xlabel("Date")
+ylabel("ms9 ratio between brewers")
 
 figure
 plot(rat(:,1),rat(:,10),'.')
@@ -133,5 +136,40 @@ hline(nanmedian(rat(:,14)))
 legend(sprintf("ms9(%d)/ms9(%d)",brewer(b1),brewer(b2)),sprintf("ms9(%d)/ms9(%d)",brewer(b1),brewer(b3)),sprintf("ms9(%d)/ms9(%d)",brewer(b2),brewer(b3)))
 datetick('x',1,'keeplimits','keepticks')
 title(sprintf("ms9 ratios %d, %d and %d Alt. (%s,%s)",brewer(b1),brewer(b2),brewer(b3),datestr(Date.CALC_DAYS(1)),datestr(Date.CALC_DAYS(end))));
+xlabel("Date")
+ylabel("ms9 ratio between brewers")
+
+figure
+plot(rat(:,2),rat(:,13),'.')
+hold
+xlabel("Temperature")
+ylabel(sprintf("ms9(%d)/ms9(%d)",brewer(b2),brewer(b3)))
+[fitt stat]=robustfit(rat(:,2),rat(:,13));
+xl = xlim;
+yr = fitt(1) + fitt(2) * xl;
+plot(xl,yr)
+yl = ylim;
+
+figure
+plot(rat(:,15),rat(:,13),'.')
+hold
+xlabel("Air mass")
+ylabel(sprintf("ms9(%d)/ms9(%d)",brewer(b2),brewer(b3)))
+[fitm stat]=robustfit(rat(:,15),rat(:,13));
+xl = xlim;
+yr = fitm(1) + fitm(2) * xl;
+plot(xl,yr)
+yl = ylim;
+
+figure
+plot(rat(:,1),rat(:,13),'.')
+hold
+plot(rat(:,1),rat(:,13)-fitt(2) * rat(:,15),'.')
+plot(rat(:,1),rat(:,13)-fitm(2) * rat(:,15),'.')
+xlabel("Date")
+ylabel("ms9 ratio between brewers")
+legend(sprintf("ms9(%d)/ms9(%d) no corregido",brewer(b2),brewer(b3)),sprintf("ms9(%d)/ms9(%d) corregido temp",brewer(b2),brewer(b3)),sprintf("ms9(%d)/ms9(%d) corregido m.o.",brewer(b2),brewer(b3)))
+
+
 
 
