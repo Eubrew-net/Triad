@@ -158,6 +158,7 @@ save(Cal.file_save,'-APPEND','sl_mov_o','sl_median_o','sl_out_o','R6_o',...
                          
 %% Creating Summaries
 close all
+tic
 [A,ETC,SL_B,SL_R,F_corr,SL_corr_flag,cfg]=read_cal_config_new(config,Cal,{sl_median_o,sl_median_n});
 
 % Data recalculation for summaries  and individual observations
@@ -170,13 +171,14 @@ for i=Cal.n_ref
     [summary_old{i} summary{i}]=filter_corr(summary_orig,summary_orig_old,i,A,F_corr{i});
     
         % depuration
-    fblacklist=fullfile(Cal.path_root,'..','configs',['blacklist_',Cal.brw_str{i},'.txt'])
+ fblacklist=fullfile(Cal.path_root,'..','configs',['blacklist_',Cal.brw_str{i},'.txt'])
     %dep{i}=cellfun(@(x) blacklist_summary(fblacklist,x),{summary_old{i} summary{i}},'UniformOutput',false)
-    dep{i,1}=blacklist_summary(fblacklist,summary_old{i});
-    dep{i,2}=blacklist_summary(fblacklist,summary{i});
-    
-  
-    
+ dep{i,1}=blacklist_summary(fblacklist,summary_old{i});
+ dep{i,2}=blacklist_summary(fblacklist,summary{i});
+ toc   
+ save(Cal.file_save,'-APPEND','A','ETC','F_corr','SL_B','SL_R','SL_corr_flag','cfg',...
+                             'summary_old','summary_orig_old','summary','summary_orig','dep'); 
+ toc   
 end
 
 % fblacklist=fullfile(Cal.path_root,'configs',['blacklist_',Cal.brw_str{i},'.txt'])
