@@ -1,3 +1,9 @@
+% Procesa los langley en cada ano (hard coded)
+%   por ano 
+%     procesa el load_data
+%    y por brewer
+%         procesa el langley de ozono
+%   
 % Buscar y sustituir este directorio por el apropiado
 %root_path='/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/'
 
