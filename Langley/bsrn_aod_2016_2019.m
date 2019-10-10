@@ -27,13 +27,13 @@ for ano=2015:2019
     
 end
 
-filewrite('aod_2016_2019.lev15',aod15);
+filewrite('aod_2015_2019.lev15',aod15);
 f1 = fopen('cloudScreening.txt','w');
 fprintf(f1,'%%date dayj clear_AM clear_PM\n');
 fprintf(f1,'%f %03d %d %d\n',cloud')
 fclose(f1)
 
- [aod,aod_m,aeronet]=read_aeronet('aod_2016_2019.lev15');
+ [aod,aod_m,aeronet]=read_aeronet('aod_2015_2019.lev15');
  aod_m(:,1)=fix(aod_m(:,1))
  aod_cloud=scan_join(aod_m,cloud);
  
