@@ -159,24 +159,28 @@ for i=1:3
     % lgl_o3
     %Date etc_1 slope_1  etc_2 slope_2 detc_1 dslope_1  detc_2 dslope_2
   
-    h1=mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,6),60,0);hold on
-    h2=mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,8),60,0);hold on
+    [h1,p1]=mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,6),60,0);hold on
+    [h2,p2]=mean_smooth_abs(lgl_o3{i}(:,1),lgl_o3{i}(:,8),60,0);hold on
+    
+    px=[p1(:,1:2),p1(:,2)+[-p1(:,3),p1(:,3)]];h1=ploty(px,'-')
+    px=[p2(:,1:2),p2(:,2)+[-p2(:,3),p2(:,3)]];h2=ploty(px,'-.')
     hold on
     plot(lgl_o3{i}(:,1),lgl_o3{i}(:,6),'.')
     plot(lgl_o3{i}(:,1),lgl_o3{i}(:,8),'x')
     
     ylim([prctile(lgl_o3{i}(:,6),0.1),prctile(lgl_o3{i}(:,6),99.9)])
-    %[xx,yy]=stairs(op{i}.UsageDate,[op{i}.ETCOnO3Ratio,alt{i}.ETCOnO3Ratio]);
-    %h=plot([xx;[now,now]],[yy;yy(end,:)], '-','LineWidth',5);
-    %legend(h,'op','alt')
+    
+    [xx,yy]=stairs(datenum(lgl_ev_final{i}.Date),[lgl_ev_final{i}.dETC1,lgl_ev_final{i}.dETC2]);
+    h=plot([xx;[now,now]],[yy;yy(end,:)], '-','LineWidth',5);
+    legend(h,'op','alt')
     %stairs(alt{i}.UsageDate,alt{i}.ETCOnO3Ratio,'k-','LineWidth',5)
     %vline_v(events{i}.dates,' ',events{i}.labels)
     vline_v(ev{i}.dates,' ',str2latex(ev{i}.labels))
-    %title(num2str(brewer(i)));
-    title([num2str(brewer(i)),'operativa']);
+    title(num2str(brewer(i)));
+    %title([num2str(brewer(i)),'operativa']);
     grid on;
     datetick('x',12,'keeplimits','keepticks')
-    %xlim([datenum(2015,12,1),now])
+    xlim([datenum(2015,12,1),now])
     set(gca,'LooseInset',get(gca,'TightInset'))
     
     %% outputs 
@@ -222,7 +226,7 @@ for i=1:3
     disp(lgl_ev_final{i})
     
     snapnow
-    end
+ end
 
 
 % data_tab_brw=meanperiods(lgl_o3{i}, events{i}); 
