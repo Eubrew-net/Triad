@@ -1,6 +1,6 @@
 cloud=[];aod15=[];
-for ano=2016:2019
-    j=ano-2015;
+for ano=2015:2019
+    j=ano-2014;
     s1_=strrep('/Users/aredondas/CODE/rbcce.aemet.es/iberonesia/RBCC_E/2019/Triad/BSRN/cloudScreening.txt','2019',num2str(ano))
     if exist(s1_)
         s=load(s1_);
@@ -14,7 +14,7 @@ for ano=2016:2019
     
     if exist(s1_)
         s1=fileread(s1_);
-        if ano~=2016  % quito cabeceras
+        if ano~=2015  % quito cabeceras
           for i=1:5 % 5 cabeceras
             [a,s1]=strtok(s1,char(10));disp(a)
           end
