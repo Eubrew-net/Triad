@@ -312,8 +312,12 @@ printfiles_report(f,Cal.dir_figs,'Width',Width,'Height',Height,'no_export');
 %  else
 %     displaytable(tabla_tc.data(:,2:end),tabla_tc.data_lbl,8,'.2f',tabla_tc.events);
 %  end 
- matrix2latex_ctable(tabla_tc.data(:,2:end)',fullfile(Cal.file_latex,['table_tc_',Cal.brw_str{Cal.n_inst},'.tex']),...
-                                    'rowlabels',tabla_tc.data_lbl,'columnlabels',tabla_tc.events,...
+trows=[3,2,10,11]
+ttemp=tabla_tc.data(:,trows)
+ttemp(:,3)=round(ttemp(:,3),2)
+ttemp(:,4)=round(ttemp(:,4),2)
+matrix2latex_ctable(ttemp',fullfile(Cal.file_latex,['table_tc_',Cal.brw_str{Cal.n_inst},'.tex']),...
+                                    'rowlabels',tabla_tc.data_lbl(trows-1),'columnlabels',tabla_tc.events,...
                                     'alignment','c','resize',0.9);
                                 
 ix=sort(findobj('-regexp','Tag','TEMP_COMP\w+'));
